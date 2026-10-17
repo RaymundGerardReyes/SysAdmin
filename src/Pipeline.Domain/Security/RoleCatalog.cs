@@ -16,7 +16,10 @@ public static class RoleCatalog
         {
             PermissionCatalog.JobsRead,
             PermissionCatalog.SheetsValuesRead,
-            PermissionCatalog.BiginContactsRead
+            PermissionCatalog.BiginContactsRead,
+            PermissionCatalog.BiginOrgRead,
+            PermissionCatalog.BiginRelatedListsRead,
+            PermissionCatalog.BiginNotificationsRead
         });
 
     public static readonly Role Operator = new(
@@ -30,7 +33,12 @@ public static class RoleCatalog
             PermissionCatalog.GmailMessagesSend,
             PermissionCatalog.ChatMessagesCreate,
             PermissionCatalog.BiginContactsRead,
-            PermissionCatalog.BiginContactsCreate
+            PermissionCatalog.BiginContactsCreate,
+            PermissionCatalog.BiginOrgRead,
+            PermissionCatalog.BiginOrgWrite,
+            PermissionCatalog.BiginRelatedListsRead,
+            PermissionCatalog.BiginNotificationsRead,
+            PermissionCatalog.BiginNotificationsWrite
         });
 
     public static readonly Role FinanceOperator = new(
@@ -90,6 +98,11 @@ public static class RoleCatalog
             PermissionCatalog.ZohoExpenseCreate,
             PermissionCatalog.BiginContactsRead,
             PermissionCatalog.BiginContactsCreate,
+            PermissionCatalog.BiginOrgRead,
+            PermissionCatalog.BiginOrgWrite,
+            PermissionCatalog.BiginRelatedListsRead,
+            PermissionCatalog.BiginNotificationsRead,
+            PermissionCatalog.BiginNotificationsWrite,
             PermissionCatalog.PaymentsStatusRead,
             PermissionCatalog.IntegrationsConnect,
             PermissionCatalog.IntegrationsDisconnect,

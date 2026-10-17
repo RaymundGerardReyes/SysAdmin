@@ -12,6 +12,11 @@ public static class PermissionCatalog
     public static readonly Permission ZohoExpenseCreate = new("zoho.expense.create");
     public static readonly Permission BiginContactsRead = new("bigin.contacts.read");
     public static readonly Permission BiginContactsCreate = new("bigin.contacts.create");
+    public static readonly Permission BiginOrgRead = new("bigin.org.read");
+    public static readonly Permission BiginOrgWrite = new("bigin.org.write");
+    public static readonly Permission BiginRelatedListsRead = new("bigin.relatedlists.read");
+    public static readonly Permission BiginNotificationsRead = new("bigin.notifications.read");
+    public static readonly Permission BiginNotificationsWrite = new("bigin.notifications.write");
     public static readonly Permission PaymentsStatusRead = new("payments.status.read");
     public static readonly Permission PaymentsCheckoutCreate = new("payments.checkout.create");
     public static readonly Permission PaymentsCheckoutApprove = new("payments.checkout.approve");
@@ -33,6 +38,11 @@ public static class PermissionCatalog
         [ZohoExpenseCreate] = RiskTier.T2,
         [BiginContactsRead] = RiskTier.T0,
         [BiginContactsCreate] = RiskTier.T2,
+        [BiginOrgRead] = RiskTier.T0,
+        [BiginOrgWrite] = RiskTier.T2,
+        [BiginRelatedListsRead] = RiskTier.T0,
+        [BiginNotificationsRead] = RiskTier.T0,
+        [BiginNotificationsWrite] = RiskTier.T2,
         [PaymentsStatusRead] = RiskTier.T0,
         [PaymentsCheckoutCreate] = RiskTier.T3,
         [PaymentsCheckoutApprove] = RiskTier.T3,

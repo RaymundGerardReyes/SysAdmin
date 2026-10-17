@@ -24,6 +24,11 @@ Role: IntegrationAdmin
 Role: Operator
   - bigin.contacts.create
   - bigin.contacts.read
+  - bigin.notifications.read
+  - bigin.notifications.write
+  - bigin.org.read
+  - bigin.org.write
+  - bigin.relatedlists.read
   - chat.messages.create
   - gmail.messages.send
   - jobs.cancel
@@ -36,6 +41,11 @@ Role: Owner
   - admin.users.manage
   - bigin.contacts.create
   - bigin.contacts.read
+  - bigin.notifications.read
+  - bigin.notifications.write
+  - bigin.org.read
+  - bigin.org.write
+  - bigin.relatedlists.read
   - chat.messages.create
   - gmail.messages.send
   - integrations.connect
@@ -49,5 +59,8 @@ Role: Owner
   - zoho.expense.read
 Role: Viewer
   - bigin.contacts.read
+  - bigin.notifications.read
+  - bigin.org.read
+  - bigin.relatedlists.read
   - jobs.read
   - sheets.values.read

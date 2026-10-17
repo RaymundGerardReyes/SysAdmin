@@ -15,7 +15,11 @@ public static class IpcSchemaValidator
         "payments.checkout.approve",
         "admin.users.manage",
         "jobs.read",
-        "jobs.cancel"
+        "jobs.cancel",
+        "bigin.modules.read",
+        "bigin.org.read",
+        "bigin.org.photo.upload",
+        "bigin.relatedlists.read"
     };
 
     public static bool ValidateEnvelope(string json, out IpcEnvelope? envelope, out string? errorCode)

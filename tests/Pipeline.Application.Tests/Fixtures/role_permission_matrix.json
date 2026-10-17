@@ -2,7 +2,10 @@
   "Viewer": [
     "jobs.read",
     "sheets.values.read",
-    "bigin.contacts.read"
+    "bigin.contacts.read",
+    "bigin.org.read",
+    "bigin.relatedlists.read",
+    "bigin.notifications.read"
   ],
   "Operator": [
     "jobs.read",
@@ -12,7 +15,12 @@
     "gmail.messages.send",
     "chat.messages.create",
     "bigin.contacts.read",
-    "bigin.contacts.create"
+    "bigin.contacts.create",
+    "bigin.org.read",
+    "bigin.org.write",
+    "bigin.relatedlists.read",
+    "bigin.notifications.read",
+    "bigin.notifications.write"
   ],
   "FinanceOperator": [
     "jobs.read",
@@ -52,6 +60,11 @@
     "zoho.expense.create",
     "bigin.contacts.read",
     "bigin.contacts.create",
+    "bigin.org.read",
+    "bigin.org.write",
+    "bigin.relatedlists.read",
+    "bigin.notifications.read",
+    "bigin.notifications.write",
     "payments.status.read",
     "integrations.connect",
     "integrations.disconnect",

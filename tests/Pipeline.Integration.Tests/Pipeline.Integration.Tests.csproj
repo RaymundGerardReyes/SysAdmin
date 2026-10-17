@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\src\Pipeline.Application\Pipeline.Application.csproj" />
     <ProjectReference Include="..\..\src\Pipeline.Infrastructure\Pipeline.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Integrations.Google.Sheets\Integrations.Google.Sheets.csproj" />
+    <ProjectReference Include="..\..\src\Integrations.Zoho.Bigin\Integrations.Zoho.Bigin.csproj" />
     <ProjectReference Include="..\Pipeline.TestKit\Pipeline.TestKit.csproj" />
   </ItemGroup>
 

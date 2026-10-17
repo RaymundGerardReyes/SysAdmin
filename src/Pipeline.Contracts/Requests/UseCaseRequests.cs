@@ -30,3 +30,25 @@ public sealed record ApprovePaymentCheckoutRequest(
 public sealed record ManageUserRolesRequest(
     string TargetUserId,
     IReadOnlySet<string> NewRoleNames);
+
+public sealed record GetBiginModulesRequest(
+    string? DataCenter = null);
+
+public sealed record GetBiginOrgRequest(
+    string? DataCenter = null);
+
+public sealed record UploadBiginOrgPhotoRequest(
+    string? DataCenter,
+    byte[] FileBytes,
+    string FileName,
+    string ContentType = "image/png");
+
+public sealed record GetBiginRelatedRecordsRequest(
+    string ModuleApiName,
+    string RecordId,
+    string RelatedListApiName,
+    IReadOnlyList<string>? Fields = null,
+    int? Page = 1,
+    int? PerPage = 200,
+    string? DataCenter = null);
+

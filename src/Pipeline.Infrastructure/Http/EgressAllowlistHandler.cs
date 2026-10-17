@@ -12,7 +12,23 @@ internal sealed class EgressAllowlistHandler : DelegatingHandler
         "api.paymongo.com",
         "accounts.zoho.com",
         "expense.zoho.com",
-        "bigin.zoho.com"
+        "bigin.zoho.com",
+        "www.zohoapis.com",
+        "zohoapis.com",
+        "www.zohoapis.eu",
+        "zohoapis.eu",
+        "www.zohoapis.com.au",
+        "zohoapis.com.au",
+        "www.zohoapis.in",
+        "zohoapis.in",
+        "www.zohoapis.com.cn",
+        "zohoapis.com.cn",
+        "www.zohoapis.jp",
+        "zohoapis.jp",
+        "www.zohoapis.sa",
+        "zohoapis.sa",
+        "www.zohoapis.ca",
+        "zohoapis.ca"
     };
 
     public EgressAllowlistHandler(HttpMessageHandler? innerHandler = null)

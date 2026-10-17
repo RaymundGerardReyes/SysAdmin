@@ -57,4 +57,52 @@ public class SsrfEgressTests
         inner.Invoked.ShouldBeTrue();
         inner.CapturedRequest!.Headers.Contains("Authorization").ShouldBeFalse("Caller-supplied Authorization header must be stripped");
     }
+
+    [Theory]
+    [InlineData("https://www.zohoapis.com/bigin/v2/actions/watch")]
+    [InlineData("https://zohoapis.com/bigin/v2/actions/watch")]
+    [InlineData("https://www.zohoapis.eu/bigin/v2/actions/watch")]
+    [InlineData("https://zohoapis.eu/bigin/v2/actions/watch")]
+    [InlineData("https://www.zohoapis.com.au/bigin/v2/actions/watch")]
+    [InlineData("https://zohoapis.com.au/bigin/v2/actions/watch")]
+    [InlineData("https://www.zohoapis.in/bigin/v2/actions/watch")]
+    [InlineData("https://zohoapis.in/bigin/v2/actions/watch")]
+    [InlineData("https://www.zohoapis.com.cn/bigin/v2/actions/watch")]
+    [InlineData("https://zohoapis.com.cn/bigin/v2/actions/watch")]
+    [InlineData("https://www.zohoapis.jp/bigin/v2/actions/watch")]
+    [InlineData("https://zohoapis.jp/bigin/v2/actions/watch")]
+    [InlineData("https://www.zohoapis.sa/bigin/v2/actions/watch")]
+    [InlineData("https://zohoapis.sa/bigin/v2/actions/watch")]
+    [InlineData("https://www.zohoapis.ca/bigin/v2/actions/watch")]
+    [InlineData("https://zohoapis.ca/bigin/v2/actions/watch")]
+    public async Task Egress_Allows_AllEightZohoBiginDataCenters(string url)
+    {
+        var inner = new StubInnerHandler();
+        var handler = new EgressAllowlistHandler(inner);
+        var client = new HttpClient(handler);
+
+        var response = await client.GetAsync(url);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        inner.Invoked.ShouldBeTrue("Valid Bigin DC endpoint must be allowed through egress guard");
+    }
+
+    [Theory]
+    [InlineData("https://evil.zohoapis.com/")]
+    [InlineData("https://attacker.zohoapis.eu/")]
+    [InlineData("https://www.zohoapis.com.evil.com/")]
+    [InlineData("https://www.zohoapis.ca@evil.com/")]
+    public async Task Egress_Blocks_DisallowedZohoSubdomainsAndAttacks(string url)
+    {
+        var inner = new StubInnerHandler();
+        var handler = new EgressAllowlistHandler(inner);
+        var client = new HttpClient(handler);
+
+        await Should.ThrowAsync<HttpRequestException>(async () =>
+        {
+            await client.GetAsync(url);
+        });
+
+        inner.Invoked.ShouldBeFalse("Disallowed or attacker zoho subdomain must be blocked");
+    }
 }

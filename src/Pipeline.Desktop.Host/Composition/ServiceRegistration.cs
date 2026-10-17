@@ -5,6 +5,7 @@ using Pipeline.Application.Pipeline;
 using Pipeline.Application.Pipeline.Behaviors;
 using Pipeline.Application.UseCases;
 using Pipeline.Application.UseCases.Admin;
+using Pipeline.Application.UseCases.Bigin;
 using Pipeline.Application.UseCases.Gmail;
 using Pipeline.Application.UseCases.Payments;
 using Pipeline.Application.UseCases.Sheets;
@@ -51,6 +52,10 @@ public static class ServiceRegistration
         services.AddTransient<IUseCaseHandler<CreatePaymentCheckoutCommand, PaymentCheckoutResponse>, CreatePaymentCheckoutUseCase>();
         services.AddTransient<IUseCaseHandler<ApprovePaymentCheckoutCommand, PaymentApprovalResponse>, ApprovePaymentCheckoutUseCase>();
         services.AddTransient<IUseCaseHandler<ManageUserRolesCommand, ManageUserRolesResponse>, ManageUserRolesUseCase>();
+        services.AddTransient<IUseCaseHandler<GetBiginModulesCommand, BiginModulesResponseContract>, GetBiginModulesUseCase>();
+        services.AddTransient<IUseCaseHandler<GetBiginOrgCommand, BiginOrgResponseContract>, GetBiginOrgUseCase>();
+        services.AddTransient<IUseCaseHandler<UploadBiginOrgPhotoCommand, BiginPhotoUploadResponseContract>, UploadBiginOrgPhotoUseCase>();
+        services.AddTransient<IUseCaseHandler<GetBiginRelatedRecordsCommand, BiginRelatedRecordsResponseContract>, GetBiginRelatedRecordsUseCase>();
 
         // IPC Router
         services.AddSingleton<IpcMessageRouter>();

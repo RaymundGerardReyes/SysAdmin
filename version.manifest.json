@@ -4,7 +4,7 @@
   "description": "Multi-component decoupled Semantic Versioning manifest for PipelineSolution",
   "components": {
     "backend": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "tagPrefix": "backend-v",
       "description": "Backend modular monolith domain, application, infrastructure, host and integrations",
       "canonicalFile": "Directory.Build.props",

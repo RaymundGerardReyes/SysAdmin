@@ -9,7 +9,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <NoWarn>$(NoWarn);CA1711;CA1000;CA1859;CA1707;CA1305;CA1822;CA1850;CA1861;CA1310</NoWarn>
     <!-- Decoupled Semantic Versioning: Backend Scope -->
-    <BackendVersion Condition="'$(BackendVersion)' == ''">1.0.0</BackendVersion>
+    <BackendVersion Condition="'$(BackendVersion)' == ''">1.1.0</BackendVersion>
     <Version>$(BackendVersion)</Version>
     <AssemblyVersion>$(BackendVersion)</AssemblyVersion>
     <FileVersion>$(BackendVersion)</FileVersion>
