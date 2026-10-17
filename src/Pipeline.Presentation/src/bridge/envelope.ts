@@ -15,7 +15,7 @@ export function createBridgeEnvelope<T>(
     id: createRequestId(),
     command,
     correlationId,
-    idempotencyKey,
+    ...(idempotencyKey !== undefined ? { idempotencyKey } : {}),
     payload,
   };
 }

@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 
 function main() {
   console.log('[build-docs-reference] Generating reference docs from codebase catalogs...');
-  const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+  const currentDir = __dirname;
   const baseDir = path.resolve(currentDir, '..');
   const refDir = path.join(baseDir, 'docs', '06-reference');
   fs.mkdirSync(refDir, { recursive: true });

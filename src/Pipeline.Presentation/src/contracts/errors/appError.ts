@@ -16,5 +16,11 @@ export function createAppError(
   pathId?: string,
   approvalId?: string
 ): AppError {
-  return { code, message, correlationId, pathId, approvalId };
+  return {
+    code,
+    message,
+    correlationId,
+    ...(pathId !== undefined ? { pathId } : {}),
+    ...(approvalId !== undefined ? { approvalId } : {}),
+  };
 }

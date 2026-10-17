@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 
 function main() {
   console.log('[check-contract-drift] Verifying contracts against snapshots...');
-  const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+  const currentDir = __dirname;
   const baseDir = path.resolve(currentDir, '..');
   const snapshotDir = path.join(baseDir, 'contracts-snapshots');
   const contractsDir = path.join(baseDir, 'src', 'contracts');

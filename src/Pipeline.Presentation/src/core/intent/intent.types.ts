@@ -15,7 +15,12 @@ export type IntentPhase =
 
 export type IntentState =
   | { readonly phase: 'Idle' }
-  | { readonly phase: 'Validating'; readonly correlationId: CorrelationId; readonly idempotencyKey: IdempotencyKey }
+  | {
+      readonly phase: 'Validating';
+      readonly correlationId: CorrelationId;
+      readonly idempotencyKey: IdempotencyKey;
+      readonly requiresConfirm?: boolean;
+    }
   | { readonly phase: 'AwaitingConfirm'; readonly correlationId: CorrelationId; readonly idempotencyKey: IdempotencyKey }
   | { readonly phase: 'Submitting'; readonly correlationId: CorrelationId; readonly idempotencyKey: IdempotencyKey }
   | { readonly phase: 'AwaitingStepUp'; readonly correlationId: CorrelationId; readonly idempotencyKey: IdempotencyKey }
@@ -26,7 +31,7 @@ export type IntentState =
 
 export type IntentEvent =
   | { readonly type: 'START'; readonly correlationId: CorrelationId; readonly idempotencyKey: IdempotencyKey; readonly requiresConfirm?: boolean }
-  | { readonly type: 'VALID' }
+  | { readonly type: 'VALID'; readonly requiresConfirm?: boolean }
   | { readonly type: 'INVALID'; readonly errors: Record<string, string> }
   | { readonly type: 'CONFIRMED' }
   | { readonly type: 'SUCCEEDED'; readonly data?: unknown }

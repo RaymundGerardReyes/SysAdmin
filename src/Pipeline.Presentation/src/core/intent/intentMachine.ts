@@ -12,13 +12,21 @@ export function intentReducer(state: IntentState, event: IntentEvent): IntentSta
           phase: 'Validating',
           correlationId: event.correlationId,
           idempotencyKey: event.idempotencyKey,
+          ...(event.requiresConfirm !== undefined ? { requiresConfirm: event.requiresConfirm } : {}),
         };
       }
       break;
     }
-
     case 'Validating': {
       if (event.type === 'VALID') {
+        const needsConfirm = event.requiresConfirm ?? state.requiresConfirm ?? false;
+        if (needsConfirm) {
+          return {
+            phase: 'AwaitingConfirm',
+            correlationId: state.correlationId,
+            idempotencyKey: state.idempotencyKey,
+          };
+        }
         return {
           phase: 'Submitting',
           correlationId: state.correlationId,
@@ -34,7 +42,6 @@ export function intentReducer(state: IntentState, event: IntentEvent): IntentSta
       }
       break;
     }
-
     case 'AwaitingConfirm': {
       if (event.type === 'CONFIRMED') {
         return {
@@ -48,7 +55,6 @@ export function intentReducer(state: IntentState, event: IntentEvent): IntentSta
       }
       break;
     }
-
     case 'Submitting': {
       if (event.type === 'SUCCEEDED') {
         return {
@@ -61,7 +67,7 @@ export function intentReducer(state: IntentState, event: IntentEvent): IntentSta
         return {
           phase: 'AwaitingStepUp',
           correlationId: state.correlationId,
-          idempotencyKey: state.idempotencyKey, // Retains same key
+          idempotencyKey: state.idempotencyKey,
         };
       }
       if (event.type === 'PENDING_APPROVAL') {
@@ -89,13 +95,12 @@ export function intentReducer(state: IntentState, event: IntentEvent): IntentSta
       }
       break;
     }
-
     case 'AwaitingStepUp': {
       if (event.type === 'CONFIRMED') {
         return {
           phase: 'Submitting',
           correlationId: state.correlationId,
-          idempotencyKey: state.idempotencyKey, // Submits with SAME key
+          idempotencyKey: state.idempotencyKey,
         };
       }
       if (event.type === 'RESET') {
@@ -103,28 +108,9 @@ export function intentReducer(state: IntentState, event: IntentEvent): IntentSta
       }
       break;
     }
-
-    case 'PendingApproval': {
-      if (event.type === 'RESET') {
-        return INITIAL_INTENT_STATE;
-      }
-      break;
-    }
-
-    case 'OutcomeUnknown': {
-      if (event.type === 'RESET') {
-        return INITIAL_INTENT_STATE;
-      }
-      break;
-    }
-
-    case 'Succeeded': {
-      if (event.type === 'RESET') {
-        return INITIAL_INTENT_STATE;
-      }
-      break;
-    }
-
+    case 'PendingApproval':
+    case 'OutcomeUnknown':
+    case 'Succeeded':
     case 'Failed': {
       if (event.type === 'RESET') {
         return INITIAL_INTENT_STATE;

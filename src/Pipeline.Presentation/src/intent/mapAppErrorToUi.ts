@@ -15,7 +15,10 @@ export function mapAppErrorToUi(error: AppError): UiDirective {
       return { kind: 'OPEN_STEP_UP' };
 
     case 'APPROVAL_REQUIRED':
-      return { kind: 'APPROVAL_PENDING', approvalId: error.approvalId };
+      return {
+        kind: 'APPROVAL_PENDING',
+        ...(error.approvalId !== undefined ? { approvalId: error.approvalId } : {}),
+      };
 
     case 'PERMISSION_MISSING':
     case 'RESOURCE_OUT_OF_SCOPE':

@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 
 function main() {
   console.log('[check-structure] Verifying folder grammar, manifests, and per-folder READMEs...');
-  const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+  const currentDir = __dirname;
   const srcDir = path.resolve(currentDir, '..', 'src');
 
   const requiredReadmes = [

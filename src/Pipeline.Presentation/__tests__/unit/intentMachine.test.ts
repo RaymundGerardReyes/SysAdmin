@@ -67,6 +67,25 @@ describe('intentMachine', () => {
     }
   });
 
+  it('[L-04] requiresConfirm transitions to AwaitingConfirm and resumes to Submitting on CONFIRMED', () => {
+    const correlationId = createCorrelationId();
+    const idempotencyKey = createIdempotencyKey();
+
+    let state = intentReducer(INITIAL_INTENT_STATE, {
+      type: 'START',
+      correlationId,
+      idempotencyKey,
+      requiresConfirm: true,
+    });
+    expect(state.phase).toBe('Validating');
+
+    state = intentReducer(state, { type: 'VALID' });
+    expect(state.phase).toBe('AwaitingConfirm');
+
+    state = intentReducer(state, { type: 'CONFIRMED' });
+    expect(state.phase).toBe('Submitting');
+  });
+
   it('[L-04] throws an error on illegal state transitions', () => {
     expect(() => {
       intentReducer(INITIAL_INTENT_STATE, { type: 'SUCCEEDED' });

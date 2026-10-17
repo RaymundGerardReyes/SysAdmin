@@ -3,6 +3,8 @@ import { PipelineBridge } from '../../../bridge/PipelineBridge';
 import { CorrelationId } from '../../../core/ids/correlationId';
 import { IdempotencyKey } from '../../../core/ids/idempotencyKey';
 
+export type PaymentsApi = ReturnType<typeof createPaymentsApi>;
+
 export function createPaymentsApi(bridge: PipelineBridge) {
   return {
     async createCheckout(

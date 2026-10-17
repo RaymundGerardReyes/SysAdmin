@@ -3,6 +3,8 @@ import { PipelineBridge } from '../../../bridge/PipelineBridge';
 import { CorrelationId } from '../../../core/ids/correlationId';
 import { IdempotencyKey } from '../../../core/ids/idempotencyKey';
 
+export type GmailApi = ReturnType<typeof createGmailApi>;
+
 export function createGmailApi(bridge: PipelineBridge) {
   return {
     async sendMessage(

@@ -3,6 +3,8 @@ import { PipelineBridge } from '../../../bridge/PipelineBridge';
 import { CorrelationId } from '../../../core/ids/correlationId';
 import { IdempotencyKey } from '../../../core/ids/idempotencyKey';
 
+export type SheetsApi = ReturnType<typeof createSheetsApi>;
+
 export function createSheetsApi(bridge: PipelineBridge) {
   return {
     async readRange(spreadsheetId: string, range: string, correlationId: CorrelationId) {

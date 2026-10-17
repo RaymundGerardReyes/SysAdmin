@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 
 function getAllFiles(dir: string, ext = '.ts'): string[] {
   let files: string[] = [];
@@ -19,7 +18,7 @@ function getAllFiles(dir: string, ext = '.ts'): string[] {
 
 function main() {
   console.log('[check-traceability] Scanning Rule IDs across code headers, docs, and test suites...');
-  const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+  const currentDir = __dirname;
   const baseDir = path.resolve(currentDir, '..');
   const srcFiles = getAllFiles(path.join(baseDir, 'src'));
   const testFiles = getAllFiles(path.join(baseDir, '__tests__'));

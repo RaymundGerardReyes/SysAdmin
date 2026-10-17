@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 
 function main() {
   console.log('[check-i18n-keys] Verifying every ErrorCode has a corresponding error directive and i18n key...');
-  const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+  const currentDir = __dirname;
   const baseDir = path.resolve(currentDir, '..');
   const snapPath = path.join(baseDir, 'contracts-snapshots', 'errorCodes.snapshot.json');
   const errorCodes = JSON.parse(fs.readFileSync(snapPath, 'utf8')) as string[];
