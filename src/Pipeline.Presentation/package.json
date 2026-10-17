@@ -1,0 +1,52 @@
+{
+  "name": "@pipeline/presentation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pipeline Presentation: React Native (Windows + iOS) + Expo Modules + NativeWind v4",
+  "engines": {
+    "node": ">=22.13.0 <25.0.0",
+    "npm": ">=10.9.0"
+  },
+  "packageManager": "npm@11.7.0",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src __tests__ tools --max-warnings=0",
+    "test": "jest",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "check:structure": "ts-node tools/check-structure.ts",
+    "check:contracts": "ts-node tools/check-contract-drift.ts",
+    "check:i18n": "ts-node tools/check-i18n-keys.ts",
+    "check:trace": "ts-node tools/check-traceability.ts",
+    "check:docs": "ts-node tools/check-docs-links.ts",
+    "docs:build": "ts-node tools/build-docs-reference.ts",
+    "gen:feature": "ts-node tools/generate-feature/index.ts",
+    "gen:command": "ts-node tools/generate-command/index.ts",
+    "verify": "npm run check:structure && npm run check:contracts && npm run check:trace && npm run typecheck && npm run test"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.66.0",
+    "clsx": "^2.1.1",
+    "expo": "~53.0.0",
+    "nativewind": "^4.2.7",
+    "react": "19.0.0",
+    "react-native": "0.78.2",
+    "react-native-windows": "0.78.2",
+    "tailwind-merge": "^3.0.2",
+    "zod": "^3.24.2",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "^13.1.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.0",
+    "@types/react": "^19.0.0",
+    "dependency-cruiser": "^16.10.0",
+    "eslint": "^9.21.0",
+    "jest": "^29.7.0",
+    "knip": "^5.44.0",
+    "tailwindcss": "^3.4.17",
+    "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.8.2"
+  }
+}

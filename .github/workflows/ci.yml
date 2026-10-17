@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, release/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  version-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Decoupled SemVer Manifest and Tags
+        run: |
+          chmod +x ./scripts/orchestrate-version.sh
+          ./scripts/orchestrate-version.sh status
+
+  backend-verification:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.301'
+      - name: Restore dependencies
+        run: dotnet restore PipelineSolution.slnx
+      - name: Build with warnings as errors
+        run: dotnet build PipelineSolution.slnx --no-restore -warnaserror
+      - name: Run Unit, Path, Architecture and Security Tests
+        run: dotnet test PipelineSolution.slnx --no-build --filter "Category=Unit|Category=Path|Category=Architecture|Category=Security"
+
+  frontend-verification:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: src/Pipeline.Presentation/package-lock.json
+      - name: Install Frontend Dependencies
+        working-directory: src/Pipeline.Presentation
+        run: npm ci
+      - name: Run Frontend Quality Gates
+        working-directory: src/Pipeline.Presentation
+        run: npm run verify

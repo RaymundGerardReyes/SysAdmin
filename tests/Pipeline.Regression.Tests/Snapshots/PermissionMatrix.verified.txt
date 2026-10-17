@@ -1,0 +1,53 @@
+Role: Approver
+  - jobs.cancel
+  - jobs.read
+  - payments.checkout.approve
+  - payments.status.read
+  - sheets.values.read
+  - zoho.expense.read
+Role: Auditor
+  - admin.audit.read
+  - jobs.read
+Role: FinanceOperator
+  - jobs.cancel
+  - jobs.read
+  - payments.checkout.create
+  - payments.status.read
+  - sheets.values.read
+  - sheets.values.write
+  - zoho.expense.create
+  - zoho.expense.read
+Role: IntegrationAdmin
+  - integrations.connect
+  - integrations.disconnect
+  - jobs.read
+Role: Operator
+  - bigin.contacts.create
+  - bigin.contacts.read
+  - chat.messages.create
+  - gmail.messages.send
+  - jobs.cancel
+  - jobs.read
+  - sheets.values.read
+  - sheets.values.write
+Role: Owner
+  - admin.audit.read
+  - admin.policy.update
+  - admin.users.manage
+  - bigin.contacts.create
+  - bigin.contacts.read
+  - chat.messages.create
+  - gmail.messages.send
+  - integrations.connect
+  - integrations.disconnect
+  - jobs.cancel
+  - jobs.read
+  - payments.status.read
+  - sheets.values.read
+  - sheets.values.write
+  - zoho.expense.create
+  - zoho.expense.read
+Role: Viewer
+  - bigin.contacts.read
+  - jobs.read
+  - sheets.values.read

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pipeline.Domain\Pipeline.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Pipeline.Contracts\Pipeline.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Pipeline.Application\Pipeline.Application.csproj" />
+    <ProjectReference Include="..\..\src\Pipeline.Infrastructure\Pipeline.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'backend-v*'
+      - 'api-v*'
+      - 'frontend-v*'
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Determine Release Scope
+        id: scope
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "Tag: $TAG"
+          if [[ "$TAG" =~ ^backend-v ]]; then
+            echo "component=backend" >> $GITHUB_OUTPUT
+            echo "title=Backend Release $TAG" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" =~ ^api-v ]]; then
+            echo "component=api" >> $GITHUB_OUTPUT
+            echo "title=Local API Release $TAG" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" =~ ^frontend-v ]]; then
+            echo "component=frontend" >> $GITHUB_OUTPUT
+            echo "title=Frontend Presentation Release $TAG" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.scope.outputs.title }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+

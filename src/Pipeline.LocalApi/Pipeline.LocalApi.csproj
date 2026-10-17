@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Decoupled Semantic Versioning: API Scope -->
+    <ApiVersion Condition="'$(ApiVersion)' == ''">1.0.0</ApiVersion>
+    <Version>$(ApiVersion)</Version>
+    <AssemblyVersion>$(ApiVersion)</AssemblyVersion>
+    <FileVersion>$(ApiVersion)</FileVersion>
+    <InformationalVersion>$(ApiVersion)</InformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pipeline.Domain\Pipeline.Domain.csproj" />
+    <ProjectReference Include="..\Pipeline.Contracts\Pipeline.Contracts.csproj" />
+    <ProjectReference Include="..\Pipeline.Application\Pipeline.Application.csproj" />
+    <ProjectReference Include="..\Pipeline.Infrastructure\Pipeline.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

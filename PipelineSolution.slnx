@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Pipeline.Contracts/Pipeline.Contracts.csproj" />
+    <Project Path="src/Pipeline.Domain/Pipeline.Domain.csproj" />
+    <Project Path="src/Pipeline.Application/Pipeline.Application.csproj" />
+    <Project Path="src/Pipeline.Infrastructure/Pipeline.Infrastructure.csproj" />
+    <Project Path="src/Pipeline.Desktop.Host/Pipeline.Desktop.Host.csproj" />
+    <Project Path="src/Pipeline.LocalApi/Pipeline.LocalApi.csproj" />
+    <Project Path="src/Integrations.Google.Sheets/Integrations.Google.Sheets.csproj" />
+    <Project Path="src/Integrations.Google.Gmail/Integrations.Google.Gmail.csproj" />
+    <Project Path="src/Integrations.Google.Chat/Integrations.Google.Chat.csproj" />
+    <Project Path="src/Integrations.Zoho.Expense/Integrations.Zoho.Expense.csproj" />
+    <Project Path="src/Integrations.Zoho.Bigin/Integrations.Zoho.Bigin.csproj" />
+    <Project Path="src/Integrations.PayMongo/Integrations.PayMongo.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Pipeline.TestKit/Pipeline.TestKit.csproj" />
+    <Project Path="tests/Pipeline.Domain.Tests/Pipeline.Domain.Tests.csproj" />
+    <Project Path="tests/Pipeline.Application.Tests/Pipeline.Application.Tests.csproj" />
+    <Project Path="tests/Pipeline.Architecture.Tests/Pipeline.Architecture.Tests.csproj" />
+    <Project Path="tests/Pipeline.Security.Tests/Pipeline.Security.Tests.csproj" />
+    <Project Path="tests/Pipeline.Integration.Tests/Pipeline.Integration.Tests.csproj" />
+    <Project Path="tests/Pipeline.Contract.Tests/Pipeline.Contract.Tests.csproj" />
+    <Project Path="tests/Pipeline.Api.Tests/Pipeline.Api.Tests.csproj" />
+    <Project Path="tests/Pipeline.Regression.Tests/Pipeline.Regression.Tests.csproj" />
+  </Folder>
+</Solution>

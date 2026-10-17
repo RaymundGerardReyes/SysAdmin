@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "component": "api",
+  "version": "1.0.0",
+  "openApiSpecVersion": "1.0.0",
+  "title": "Pipeline Local API",
+  "description": "Local HTTP API service, OpenAPI specifications, and route contracts",
+  "releaseDate": "2026-10-17"
+}
+

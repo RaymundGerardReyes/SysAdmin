@@ -1,0 +1,62 @@
+{
+  "Viewer": [
+    "jobs.read",
+    "sheets.values.read",
+    "bigin.contacts.read"
+  ],
+  "Operator": [
+    "jobs.read",
+    "jobs.cancel",
+    "sheets.values.read",
+    "sheets.values.write",
+    "gmail.messages.send",
+    "chat.messages.create",
+    "bigin.contacts.read",
+    "bigin.contacts.create"
+  ],
+  "FinanceOperator": [
+    "jobs.read",
+    "jobs.cancel",
+    "sheets.values.read",
+    "sheets.values.write",
+    "zoho.expense.read",
+    "zoho.expense.create",
+    "payments.status.read",
+    "payments.checkout.create"
+  ],
+  "Approver": [
+    "jobs.read",
+    "jobs.cancel",
+    "sheets.values.read",
+    "zoho.expense.read",
+    "payments.status.read",
+    "payments.checkout.approve"
+  ],
+  "IntegrationAdmin": [
+    "jobs.read",
+    "integrations.connect",
+    "integrations.disconnect"
+  ],
+  "Auditor": [
+    "jobs.read",
+    "admin.audit.read"
+  ],
+  "Owner": [
+    "jobs.read",
+    "jobs.cancel",
+    "sheets.values.read",
+    "sheets.values.write",
+    "gmail.messages.send",
+    "chat.messages.create",
+    "zoho.expense.read",
+    "zoho.expense.create",
+    "bigin.contacts.read",
+    "bigin.contacts.create",
+    "payments.status.read",
+    "integrations.connect",
+    "integrations.disconnect",
+    "admin.users.manage",
+    "admin.policy.update",
+    "admin.audit.read"
+  ]
+}

@@ -1,0 +1,1 @@
+export { useMutationIntent } from './useMutationIntent';

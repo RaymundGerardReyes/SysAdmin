@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pipeline.Domain\Pipeline.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Pipeline.Contracts\Pipeline.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Pipeline.Application\Pipeline.Application.csproj" />
+    <ProjectReference Include="..\..\src\Pipeline.Infrastructure\Pipeline.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Pipeline.Desktop.Host\Pipeline.Desktop.Host.csproj" />
+    <ProjectReference Include="..\..\src\Pipeline.LocalApi\Pipeline.LocalApi.csproj" />
+    <ProjectReference Include="..\..\src\Integrations.Google.Sheets\Integrations.Google.Sheets.csproj" />
+    <ProjectReference Include="..\..\src\Integrations.Google.Gmail\Integrations.Google.Gmail.csproj" />
+    <ProjectReference Include="..\..\src\Integrations.Google.Chat\Integrations.Google.Chat.csproj" />
+    <ProjectReference Include="..\..\src\Integrations.Zoho.Expense\Integrations.Zoho.Expense.csproj" />
+    <ProjectReference Include="..\..\src\Integrations.Zoho.Bigin\Integrations.Zoho.Bigin.csproj" />
+    <ProjectReference Include="..\..\src\Integrations.PayMongo\Integrations.PayMongo.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="NetArchTest.Rules" />
+  </ItemGroup>
+</Project>

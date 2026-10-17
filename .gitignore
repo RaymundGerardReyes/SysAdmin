@@ -1,0 +1,33 @@
+## Build and Output
+bin/
+obj/
+out/
+dist/
+build/
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+
+## Test & Coverage
+TestResults/
+coverage/
+*.coverage
+*.opencover.xml
+.stryker-output/
+
+## Node / Frontend
+node_modules/
+.expo/
+.metro/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+## OS / Temp
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+.test_write

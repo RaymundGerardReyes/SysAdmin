@@ -1,0 +1,32 @@
+import { Permission } from './permissions';
+import { RiskTier } from './riskTiers';
+
+export interface CommandDescriptor {
+  readonly command: string;
+  readonly permission: Permission;
+  readonly tier: RiskTier;
+  readonly mutating: boolean;
+}
+
+export const COMMANDS: readonly CommandDescriptor[] = [
+  { command: 'sheets.read', permission: 'sheets.values.read', tier: 'T0', mutating: false },
+  { command: 'sheets.write', permission: 'sheets.values.write', tier: 'T1', mutating: true },
+  { command: 'gmail.send', permission: 'gmail.messages.send', tier: 'T2', mutating: true },
+  { command: 'chat.create', permission: 'chat.messages.create', tier: 'T2', mutating: true },
+  { command: 'zoho.expense.read', permission: 'zoho.expense.read', tier: 'T0', mutating: false },
+  { command: 'zoho.expense.create', permission: 'zoho.expense.create', tier: 'T2', mutating: true },
+  { command: 'bigin.contacts.read', permission: 'bigin.contacts.read', tier: 'T0', mutating: false },
+  { command: 'bigin.contacts.create', permission: 'bigin.contacts.create', tier: 'T2', mutating: true },
+  { command: 'payments.status.read', permission: 'payments.status.read', tier: 'T0', mutating: false },
+  { command: 'payments.checkout.create', permission: 'payments.checkout.create', tier: 'T3', mutating: true },
+  { command: 'payments.checkout.approve', permission: 'payments.checkout.approve', tier: 'T3', mutating: true },
+  { command: 'integrations.connect', permission: 'integrations.connect', tier: 'T3', mutating: true },
+  { command: 'integrations.disconnect', permission: 'integrations.disconnect', tier: 'T3', mutating: true },
+  { command: 'admin.users.manage', permission: 'admin.users.manage', tier: 'T3', mutating: true },
+  { command: 'admin.policy.update', permission: 'admin.policy.update', tier: 'T3', mutating: true },
+  { command: 'admin.audit.read', permission: 'admin.audit.read', tier: 'T1', mutating: false },
+  { command: 'jobs.read', permission: 'jobs.read', tier: 'T0', mutating: false },
+  { command: 'jobs.cancel', permission: 'jobs.cancel', tier: 'T1', mutating: true },
+] as const;
+
+export type CommandName = typeof COMMANDS[number]['command'];

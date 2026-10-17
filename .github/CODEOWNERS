@@ -1,0 +1,10 @@
+# Security & Core Invariants
+* @security-team @architecture-team
+/src/Pipeline.Domain/Security/ @security-team
+/src/Pipeline.Application/Authorization/ @security-team
+/src/Pipeline.Infrastructure/Security/ @security-team
+/tests/Pipeline.Architecture.Tests/ @architecture-team
+/tests/Pipeline.Security.Tests/ @security-team
+/src/Pipeline.Presentation/src/bridge/ @architecture-team
+/src/Pipeline.Presentation/src/contracts/ @architecture-team
+/src/Pipeline.Presentation/contracts-snapshots/ @security-team

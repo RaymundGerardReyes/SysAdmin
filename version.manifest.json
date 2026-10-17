@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "PipelineSolution",
+  "description": "Multi-component decoupled Semantic Versioning manifest for PipelineSolution",
+  "components": {
+    "backend": {
+      "version": "1.0.0",
+      "tagPrefix": "backend-v",
+      "description": "Backend modular monolith domain, application, infrastructure, host and integrations",
+      "canonicalFile": "Directory.Build.props",
+      "xmlProperty": "BackendVersion",
+      "conventionalScope": "backend",
+      "paths": [
+        "Directory.Build.props",
+        "Directory.Packages.props",
+        "PipelineSolution.slnx",
+        "src/Pipeline.Domain",
+        "src/Pipeline.Application",
+        "src/Pipeline.Infrastructure",
+        "src/Pipeline.Desktop.Host",
+        "src/Pipeline.Contracts",
+        "src/Integrations.Gmail",
+        "src/Integrations.GoogleSheets",
+        "src/Integrations.Stripe"
+      ]
+    },
+    "api": {
+      "version": "1.0.0",
+      "tagPrefix": "api-v",
+      "description": "Local HTTP API service, OpenAPI specifications, and route contracts",
+      "canonicalFile": "src/Pipeline.LocalApi/version.json",
+      "csprojFile": "src/Pipeline.LocalApi/Pipeline.LocalApi.csproj",
+      "xmlProperty": "ApiVersion",
+      "conventionalScope": "api",
+      "paths": [
+        "src/Pipeline.LocalApi"
+      ]
+    },
+    "frontend": {
+      "version": "1.0.0",
+      "tagPrefix": "frontend-v",
+      "description": "React Native Windows + iOS presentation, intent machine, and design system",
+      "canonicalFile": "src/Pipeline.Presentation/package.json",
+      "runtimeFile": "src/Pipeline.Presentation/src/config/buildInfo.ts",
+      "jsonKey": "version",
+      "conventionalScope": "frontend",
+      "paths": [
+        "src/Pipeline.Presentation"
+      ]
+    }
+  }
+}
+

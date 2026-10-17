@@ -1,0 +1,10 @@
+[
+  "Pending",
+  "Validating",
+  "Running",
+  "Failed",
+  "Succeeded",
+  "RetryScheduled",
+  "NeedsReauthorization",
+  "Cancelled"
+]
