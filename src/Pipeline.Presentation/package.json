@@ -1,6 +1,6 @@
 {
   "name": "@pipeline/presentation",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "private": true,
   "description": "Pipeline Presentation: React Native (Windows + iOS) + Expo Modules + NativeWind v4",
   "engines": {
@@ -56,6 +56,8 @@
     "micromatch": "^4.0.8",
     "postcss": "^8.5.30",
     "postcss-selector-parser": "^7.1.6",
-    "@xmldom/xmldom": "^0.9.12"
+    "@xmldom/xmldom": "^0.9.12",
+    "uuid": "^11.1.1",
+    "fast-xml-parser": "^5.11.2"
   }
 }

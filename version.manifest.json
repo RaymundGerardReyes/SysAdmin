@@ -37,7 +37,7 @@
       ]
     },
     "frontend": {
-      "version": "1.2.2",
+      "version": "1.2.3",
       "tagPrefix": "frontend-v",
       "description": "React Native Windows + iOS presentation, intent machine, and design system",
       "canonicalFile": "src/Pipeline.Presentation/package.json",
