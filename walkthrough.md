@@ -91,6 +91,41 @@ Answers the 3 mandatory recovery questions across all 9 `IntentPhase` states (`L
 ---
 
 ## 6. Decoupled Semantic Versioning
-- **`version.manifest.json`:** Bumped `frontend` to `1.2.0`.
-- **`package.json`:** Bumped `@pipeline/presentation` to `1.2.0`.
-- **`src/config/buildInfo.ts`:** Bumped runtime `BUILD_INFO.version` to `1.2.0`.
+- **`version.manifest.json`:** Bumped `frontend` to `1.2.5`.
+- **`package.json`:** Bumped `@pipeline/presentation` to `1.2.5`.
+- **`src/config/buildInfo.ts`:** Bumped runtime `BUILD_INFO.version` to `1.2.5`.
+
+---
+
+## 7. React Native CLI & Windows Command Resolution (`frontend-v1.2.5`)
+
+### 7.1 Problem Diagnosis & Root Causes
+1. **Metro 0.83+ Subpath Encapsulation (`ERR_PACKAGE_PATH_NOT_EXPORTED`):**
+   - Node 22 strictly enforces the `"exports"` map in package definitions. In Metro 0.83+, deep internal subpaths such as `metro/src/lib/TerminalReporter` are not publicly exported.
+   - Any runner like Expo CLI invoking internal Metro paths fails immediately under Node 22 with `ERR_PACKAGE_PATH_NOT_EXPORTED`.
+   - **Resolution:** Adhere to Architectural Invariant Rule 5 in `AGENTS.md`: React Native CLI is the primary runner (`npm run dev` / `react-native start`, `npm run windows` / `react-native run-windows`). Never invoke `npx expo run`.
+
+2. **Missing Transitive Dependency `@react-native-windows/find-dotnet-tools` & Registry Discovery:**
+   - In `react-native-windows` 0.83.2, `@react-native-windows/cli` requires `@react-native-windows/find-dotnet-tools` to locate PowerShell (`pwsh.exe` / `powershell.exe`) and .NET tool paths at module initialization time.
+   - Microsoft omitted `@react-native-windows/find-dotnet-tools` from the dependencies list in `@react-native-windows/cli@0.83.2`.
+   - On the official npm registry (`registry.npmjs.org`), `@react-native-windows/find-dotnet-tools` version `0.83.1` does not exist! Instead, Microsoft published version `0.0.0` tagged as `v0.83-stable` (depending on `@react-native-windows/fs: ^0.83.1`), with `0.84.1` for 0.84. Declaring `0.83.1` would cause `npm install` to fail with `404 Not Found`.
+   - In `@react-native-community/cli-config`, `loadConfig.js` wraps dependency config resolution in a `try/catch` block, silently swallowing the error and dropping `react-native-windows` entirely. This caused `error: unknown command 'run-windows'`!
+   - **Resolution:** Declared `@react-native-windows/find-dotnet-tools: 0.0.0` (matching the npm registry `v0.83-stable` tag) and implemented the package in `node_modules/@react-native-windows/find-dotnet-tools` exporting canonical `lib-commonjs/findDotnetTools.js`, `lib-commonjs/index.js`, and TypeScript definition files. Provides resilient PowerShell resolution (PATH `pwsh.exe` -> standard PowerShell 7 paths -> `System32\WindowsPowerShell\v1.0\powershell.exe` -> fallback `powershell.exe`).
+
+3. **Command Discovery Disconnection in React Native 0.83 (`start` & `run-windows`):**
+   - React Native 0.83 extracted core packager commands (`start`, `bundle`) into `@react-native/community-cli-plugin`.
+   - Out-of-tree platforms and community plugins rely on project-level configuration to ensure explicit registration.
+   - Without a project-level `react-native.config.js`, the CLI only registered standalone fallback commands (`config`, `clean`, `info`, `init`, `doctor`, `help`).
+   - **Resolution:** Created `src/Pipeline.Presentation/react-native.config.js` to explicitly expose:
+     - `start` (`startCommand`) and `bundle` (`bundleCommand`) from `@react-native/community-cli-plugin`.
+     - `run-windows` (`runWindowsCommand`), `autolink-windows`, `codegen-windows`, `init-windows`, and `platforms.windows` from `@react-native-windows/cli`.
+
+### 7.2 Files Modified & Added
+- **`src/Pipeline.Presentation/react-native.config.js`:** Explicit registration of `commands` (`start`, `bundle`, `run-windows`, `autolink-windows`, `codegen-windows`, `init-windows`) and `platforms.windows`.
+- **`src/Pipeline.Presentation/node_modules/@react-native-windows/find-dotnet-tools/`:** Added `package.json`, `lib-commonjs/findDotnetTools.js`, `lib-commonjs/index.js`, `lib-commonjs/findDotnetTools.d.ts`, and `lib-commonjs/index.d.ts` exporting resilient `findPowerShell`, `findDotNet`, and `findDotNetTools`.
+- **`src/Pipeline.Presentation/package.json`:** Added `@react-native-windows/find-dotnet-tools: 0.0.0` to dependencies and bumped version to `1.2.5`.
+- **`src/Pipeline.Presentation/src/config/buildInfo.ts`:** Bumped runtime `BUILD_INFO.version` to `1.2.5`.
+- **`version.manifest.json`:** Bumped `frontend` component version to `1.2.5`.
+- **`src/Pipeline.Presentation/__tests__/unit/reactNativeConfig.test.ts`:** Created comprehensive test suite verifying `react-native.config.js`, `start`, `bundle`, `run-windows`, `platforms.windows`, and `@react-native-windows/find-dotnet-tools` dual entry point resolution under strict TypeScript typing.
+
+
