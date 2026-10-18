@@ -14,7 +14,7 @@ export interface BuildInfo {
 
 export const BUILD_INFO: BuildInfo = {
   component: 'frontend',
-  version: '1.2.3',
+  version: '1.2.4',
   tagPrefix: 'frontend-v',
   targetApiVersion: '1.0.0',
   buildDate: '2026-10-18',

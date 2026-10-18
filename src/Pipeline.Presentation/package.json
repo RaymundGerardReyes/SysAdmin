@@ -1,14 +1,20 @@
 {
   "name": "@pipeline/presentation",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "private": true,
   "description": "Pipeline Presentation: React Native (Windows + iOS) + Expo Modules + NativeWind v4",
+  "main": "index.js",
   "engines": {
     "node": ">=22.13.0 <25.0.0",
     "npm": ">=10.9.0"
   },
   "packageManager": "npm@11.7.0",
   "scripts": {
+    "start": "react-native start",
+    "dev": "react-native start",
+    "windows": "react-native run-windows",
+    "ios": "react-native run-ios",
+    "android": "react-native run-android",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src __tests__ tools --max-warnings=0",
     "test": "jest",
