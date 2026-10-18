@@ -1,6 +1,6 @@
 {
   "name": "@pipeline/presentation",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "private": true,
   "description": "Pipeline Presentation: React Native (Windows + iOS) + Expo Modules + NativeWind v4",
   "main": "index.js",
@@ -12,7 +12,7 @@
   "scripts": {
     "start": "react-native start",
     "dev": "react-native start",
-    "windows": "react-native run-windows",
+    "windows": "npx @react-native-community/cli run-windows",
     "ios": "react-native run-ios",
     "android": "react-native run-android",
     "typecheck": "tsc --noEmit",
@@ -27,7 +27,8 @@
     "docs:build": "ts-node tools/build-docs-reference.ts",
     "gen:feature": "ts-node tools/generate-feature/index.ts",
     "gen:command": "ts-node tools/generate-command/index.ts",
-    "verify": "npm run check:structure && npm run check:contracts && npm run check:trace && npm run typecheck && npm run test"
+    "verify": "npm run check:structure && npm run check:contracts && npm run check:trace && npm run typecheck && npm run test",
+    "test:windows": "jest --config jest.config.windows.js"
   },
   "dependencies": {
     "@react-native-windows/find-dotnet-tools": "0.0.0",
@@ -44,6 +45,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@react-native/metro-config": "^0.83.2",
     "@testing-library/react-native": "^14.1.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.20.5",
@@ -56,7 +58,8 @@
     "test-renderer": "^1.3.1",
     "ts-jest": "^29.4.15",
     "ts-node": "^10.9.2",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "@rnx-kit/jest-preset": "^0.3.1"
   },
   "overrides": {
     "braces": "^3.0.3",
@@ -66,5 +69,12 @@
     "@xmldom/xmldom": "^0.9.12",
     "uuid": "^11.1.1",
     "fast-xml-parser": "^5.11.2"
+  },
+  "react-native-windows": {
+    "init-windows": {
+      "name": "PipelineApp",
+      "namespace": "PipelineApp",
+      "template": "cpp-app"
+    }
   }
 }
