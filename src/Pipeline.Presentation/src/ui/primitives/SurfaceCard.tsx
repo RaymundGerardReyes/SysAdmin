@@ -7,9 +7,9 @@ export type SurfacePadding = 'none' | 'sm' | 'md' | 'lg';
 
 export interface SurfaceCardProps {
   readonly children: React.ReactNode;
-  readonly variant?: SurfaceVariant;
-  readonly padding?: SurfacePadding;
-  readonly accessibilityLabel?: string;
+  readonly variant?: SurfaceVariant | undefined;
+  readonly padding?: SurfacePadding | undefined;
+  readonly accessibilityLabel?: string | undefined;
 }
 
 const VARIANT_MAP: Record<SurfaceVariant, string> = {

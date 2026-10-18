@@ -1,7 +1,15 @@
 // Rules: R-08 Platform isolation (iOS Mobile-First Shell), L-01, N-06, N-07
-// Enforces >= 44x44pt touch targets, safe-area layout, and secondary overflow sheet
+// Enforces >= 44x44pt touch targets, safe-area layout, keyboard avoiding, and secondary overflow sheet
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, Pressable, ScrollView } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { PlatformShellProps } from './PlatformShell.types';
 import { Badge, SurfaceCard } from '../ui';
 
@@ -14,6 +22,9 @@ export function PlatformShell({
   sessionStatusLabel = 'Session active',
   sessionAuthenticated = true,
   headerActions,
+  breadcrumbTrail,
+  canNavigateBack = false,
+  onNavigateBack,
   children,
 }: PlatformShellProps) {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -28,16 +39,46 @@ export function PlatformShell({
 
       {/* Compact Mobile Header */}
       <View className="px-4 py-3 bg-canvas-white dark:bg-canvas-900 border-b border-canvas-200 dark:border-canvas-800 flex-row items-center justify-between">
-        <View className="flex-1 pr-2">
-          <Text className="text-lg font-semibold text-canvas-900 dark:text-canvas-50">
-            {title}
-          </Text>
-          {subtitle ? (
-            <Text className="text-xs text-canvas-500 dark:text-canvas-400">
-              {subtitle}
+        <View className="flex-row items-center flex-1 pr-2">
+          {canNavigateBack && onNavigateBack && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Navigate back"
+              onPress={onNavigateBack}
+              className="min-h-[44px] min-w-[44px] mr-1 items-center justify-center rounded-md active:bg-canvas-100 dark:active:bg-canvas-800"
+            >
+              <Text className="text-base font-semibold text-accent-600 dark:text-accent-400">
+                ‹ Back
+              </Text>
+            </Pressable>
+          )}
+
+          <View className="flex-1">
+            {breadcrumbTrail && breadcrumbTrail.length > 0 && (
+              <Text
+                numberOfLines={1}
+                className="text-xs text-canvas-500 dark:text-canvas-400 mb-0.5"
+              >
+                {breadcrumbTrail.join(' › ')}
+              </Text>
+            )}
+            <Text
+              numberOfLines={1}
+              className="text-lg font-semibold text-canvas-900 dark:text-canvas-50"
+            >
+              {title}
             </Text>
-          ) : null}
+            {subtitle ? (
+              <Text
+                numberOfLines={1}
+                className="text-xs text-canvas-500 dark:text-canvas-400"
+              >
+                {subtitle}
+              </Text>
+            ) : null}
+          </View>
         </View>
+
         <View className="flex-row items-center gap-2">
           {headerActions}
           <Badge
@@ -85,13 +126,18 @@ export function PlatformShell({
         </View>
       )}
 
-      {/* Single-Column Mobile Scroll Canvas */}
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        className="flex-1 px-4 py-4"
+      {/* Single-Column Mobile Scroll Canvas with KeyboardAvoidingView */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        className="flex-1"
       >
-        <View className="pb-6">{children}</View>
-      </ScrollView>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          className="flex-1 px-4 py-4"
+        >
+          <View className="pb-6">{children}</View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Ergonomic Bottom Tab Bar (Minimum 44x44pt Touch Targets) */}
       {navItems.length > 0 && (

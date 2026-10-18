@@ -8,19 +8,20 @@ export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'destructive'
 export interface ActionButtonProps {
   readonly label: string;
   readonly onPress: () => void;
-  readonly variant?: ButtonVariant;
-  readonly isSubmitting?: boolean;
-  readonly submittingLabel?: string;
-  readonly disabled?: boolean;
-  readonly fullWidth?: boolean;
-  readonly accessibilityHint?: string;
+  readonly variant?: ButtonVariant | undefined;
+  readonly isSubmitting?: boolean | undefined;
+  readonly submittingLabel?: string | undefined;
+  readonly disabled?: boolean | undefined;
+  readonly disabledReason?: string | undefined;
+  readonly fullWidth?: boolean | undefined;
+  readonly accessibilityHint?: string | undefined;
 }
 
 const SURFACE_MAP: Record<ButtonVariant, string> = {
-  primary: 'bg-accent-600 active:bg-accent-700 border border-accent-600',
-  secondary: 'bg-canvas-white dark:bg-canvas-900 active:bg-canvas-100 dark:active:bg-canvas-800 border border-canvas-200 dark:border-canvas-700',
-  tertiary: 'bg-transparent active:bg-canvas-100 dark:active:bg-canvas-800 border border-transparent',
-  destructive: 'bg-status-dangerBg active:bg-status-dangerBorder border border-status-dangerBorder',
+  primary: 'bg-accent-600 active:bg-accent-700 hover:bg-accent-700 border border-accent-600 focus:border-accent-400',
+  secondary: 'bg-canvas-white dark:bg-canvas-900 active:bg-canvas-100 dark:active:bg-canvas-800 hover:bg-canvas-50 dark:hover:bg-canvas-850 border border-canvas-200 dark:border-canvas-700 focus:border-accent-500',
+  tertiary: 'bg-transparent active:bg-canvas-100 dark:active:bg-canvas-800 hover:bg-canvas-50 dark:hover:bg-canvas-850 border border-transparent focus:border-accent-500',
+  destructive: 'bg-status-dangerBg active:bg-status-dangerBorder hover:bg-status-dangerBg/80 border border-status-dangerBorder focus:border-status-dangerText',
 };
 
 const DISABLED_SURFACE = 'bg-canvas-100 dark:bg-canvas-800 border border-canvas-200 dark:border-canvas-700 opacity-60';
@@ -41,6 +42,7 @@ export function ActionButton({
   isSubmitting = false,
   submittingLabel = 'Working…',
   disabled = false,
+  disabledReason,
   fullWidth = false,
   accessibilityHint,
 }: ActionButtonProps) {
@@ -50,7 +52,7 @@ export function ActionButton({
   const surfaceClass = isLocked ? DISABLED_SURFACE : SURFACE_MAP[variant];
   const textClass = isLocked ? DISABLED_TEXT : TEXT_MAP[variant];
 
-  return (
+  const buttonElement = (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={isSubmitting ? `${label}, ${submittingLabel}` : label}
@@ -70,5 +72,20 @@ export function ActionButton({
       )}
     </Pressable>
   );
-}
 
+  if (disabled && disabledReason) {
+    return (
+      <View className={widthClass}>
+        {buttonElement}
+        <Text
+          accessibilityRole="alert"
+          className="text-xs text-canvas-500 dark:text-canvas-400 mt-1 px-1"
+        >
+          {disabledReason}
+        </Text>
+      </View>
+    );
+  }
+
+  return buttonElement;
+}

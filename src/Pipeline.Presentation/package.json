@@ -1,6 +1,6 @@
 {
   "name": "@pipeline/presentation",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Pipeline Presentation: React Native (Windows + iOS) + Expo Modules + NativeWind v4",
   "engines": {

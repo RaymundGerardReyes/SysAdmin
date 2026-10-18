@@ -32,21 +32,22 @@ describe('Frontend Architectural Boundaries', () => {
     return imports;
   }
 
-  function importsLayer(imp: string, layer: string): boolean {
-    const regex = new RegExp(`(^|\\/)${layer}(\\/|$)`);
-    return regex.test(imp);
+  function matchesForbiddenLayer(imp: string, layer: string): boolean {
+    const cleanLayer = layer.replace(/^\//, '');
+    const pattern = new RegExp(`(^|\\/)(${cleanLayer})(\\/|$)`);
+    return pattern.test(imp);
   }
 
   test('Contracts layer (L-02) does not import any higher concentric layer', () => {
     const contractsDir = path.join(srcRoot, 'contracts');
     const files = getAllFiles(contractsDir, ['.ts', '.tsx']);
-    const forbiddenLayers = ['core', 'bridge', 'ui', 'state', 'security', 'observability', 'intent', 'platform', 'features', 'app'];
+    const forbiddenPatterns = ['core', 'bridge', 'ui', 'state', 'security', 'observability', 'intent', 'platform', 'features', 'app'];
 
     for (const file of files) {
       const imports = getImports(file);
       for (const imp of imports) {
-        for (const forbidden of forbiddenLayers) {
-          expect(importsLayer(imp, forbidden)).toBe(false);
+        for (const forbidden of forbiddenPatterns) {
+          expect(matchesForbiddenLayer(imp, forbidden)).toBe(false);
         }
       }
     }
@@ -55,13 +56,13 @@ describe('Frontend Architectural Boundaries', () => {
   test('Core layer (L-03) does not import bridge, state, ui, features, or app', () => {
     const coreDir = path.join(srcRoot, 'core');
     const files = getAllFiles(coreDir, ['.ts', '.tsx']);
-    const forbiddenLayers = ['bridge', 'ui', 'state', 'platform', 'features', 'app'];
+    const forbiddenPatterns = ['bridge', 'ui', 'state', 'platform', 'features', 'app'];
 
     for (const file of files) {
       const imports = getImports(file);
       for (const imp of imports) {
-        for (const forbidden of forbiddenLayers) {
-          expect(importsLayer(imp, forbidden)).toBe(false);
+        for (const forbidden of forbiddenPatterns) {
+          expect(matchesForbiddenLayer(imp, forbidden)).toBe(false);
         }
       }
     }
@@ -70,13 +71,13 @@ describe('Frontend Architectural Boundaries', () => {
   test('Bridge layer (L-04) does not import ui, state, intent, platform, features, or app', () => {
     const bridgeDir = path.join(srcRoot, 'bridge');
     const files = getAllFiles(bridgeDir, ['.ts', '.tsx']);
-    const forbiddenLayers = ['ui', 'state', 'platform', 'features', 'app'];
+    const forbiddenPatterns = ['ui', 'state', 'platform', 'features', 'app'];
 
     for (const file of files) {
       const imports = getImports(file);
       for (const imp of imports) {
-        for (const forbidden of forbiddenLayers) {
-          expect(importsLayer(imp, forbidden)).toBe(false);
+        for (const forbidden of forbiddenPatterns) {
+          expect(matchesForbiddenLayer(imp, forbidden)).toBe(false);
         }
       }
     }
@@ -121,7 +122,7 @@ describe('Frontend Architectural Boundaries', () => {
       const allowedToImportBridge = isBridgeModule || isFeatureApi || isAppModule || isTestOrTool;
 
       const imports = getImports(file);
-      const importsBridge = imports.some(imp => importsLayer(imp, 'bridge'));
+      const importsBridge = imports.some(imp => imp.includes('/bridge') || imp === '../bridge' || imp === './bridge');
 
       if (importsBridge && !allowedToImportBridge) {
         throw new Error(`File ${normalizedPath} violates One-Bridge-Door by importing bridge`);

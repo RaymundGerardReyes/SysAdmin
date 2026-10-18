@@ -5,21 +5,23 @@ export interface ShellNavItem {
   readonly id: string;
   readonly label: string;
   readonly symbol: string;
-  readonly badgeCount?: number;
-  readonly isPrimaryMobileTab?: boolean;
+  readonly badgeCount?: number | undefined;
+  readonly isPrimaryMobileTab?: boolean | undefined;
 }
 
 export interface PlatformShellProps {
-  readonly title?: string;
-  readonly subtitle?: string;
-  readonly navItems?: readonly ShellNavItem[];
-  readonly activeNavId?: string;
-  readonly onSelectNav?: (id: string) => void;
-  readonly sidebarOpen?: boolean;
-  readonly onToggleSidebar?: () => void;
-  readonly sessionStatusLabel?: string;
-  readonly sessionAuthenticated?: boolean;
-  readonly headerActions?: React.ReactNode;
+  readonly title?: string | undefined;
+  readonly subtitle?: string | undefined;
+  readonly navItems?: readonly ShellNavItem[] | undefined;
+  readonly activeNavId?: string | undefined;
+  readonly onSelectNav?: ((id: string) => void) | undefined;
+  readonly sidebarOpen?: boolean | undefined;
+  readonly onToggleSidebar?: (() => void) | undefined;
+  readonly sessionStatusLabel?: string | undefined;
+  readonly sessionAuthenticated?: boolean | undefined;
+  readonly headerActions?: React.ReactNode | undefined;
+  readonly breadcrumbTrail?: readonly string[] | undefined;
+  readonly canNavigateBack?: boolean | undefined;
+  readonly onNavigateBack?: (() => void) | undefined;
   readonly children: React.ReactNode;
 }
-

@@ -1,5 +1,5 @@
 // Rules: R-01 Single bridge door via paymentsApi, L-04 9-Phase Intent Machine, B-02 No blind retries, N-06, N-07
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import {
   SurfaceCard,
@@ -11,34 +11,54 @@ import {
   useAppTheme,
 } from '../../../ui';
 import { useMutationIntent } from '../../../intent/useMutationIntent';
-import { PaymentsApi } from '../api/paymentsApi';
+import { PaymentsApi, createPaymentsApi } from '../api/paymentsApi';
 
 export interface PaymentsWorkspaceScreenProps {
-  readonly api: PaymentsApi;
-  readonly canCreateCheckout: boolean;
-  readonly canApproveCheckout: boolean;
-  readonly onInspectJobs: () => void;
+  readonly api?: PaymentsApi | undefined;
+  readonly bridge?: Parameters<typeof createPaymentsApi>[0] | undefined;
+  readonly canCreateCheckout?: boolean | undefined;
+  readonly canApproveCheckout?: boolean | undefined;
+  readonly onInspectJobs?: (() => void) | undefined;
+  readonly onDirtyChange?: ((isDirty: boolean) => void) | undefined;
 }
 
 export function PaymentsWorkspaceScreen({
-  api: paymentsApi,
-  canCreateCheckout,
-  canApproveCheckout,
+  api,
+  bridge,
+  canCreateCheckout = true,
+  canApproveCheckout = true,
   onInspectJobs,
+  onDirtyChange,
 }: PaymentsWorkspaceScreenProps) {
   const { isCompact } = useAppTheme();
+
+  const paymentsApi = useMemo(() => {
+    if (api) return api;
+    if (bridge) return createPaymentsApi(bridge);
+    throw new Error('PaymentsWorkspaceScreen requires either an api or bridge prop');
+  }, [api, bridge]);
 
   const [accountId, setAccountId] = useState('acct_paymongo_primary');
   const [amountInput, setAmountInput] = useState('2500.00');
   const [currency, setCurrency] = useState('PHP');
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [createValidationError, setCreateValidationError] = useState<string | null>(null);
 
   const [approvalId, setApprovalId] = useState('');
   const [checkoutIdToApprove, setCheckoutIdToApprove] = useState('');
+  const [approveValidationError, setApproveValidationError] = useState<string | null>(null);
+
+  const isCreateDirty = accountId !== 'acct_paymongo_primary' || amountInput !== '2500.00' || currency !== 'PHP';
+  const isApproveDirty = Boolean(approvalId.trim() || checkoutIdToApprove.trim());
+  const isDirty = isCreateDirty || isApproveDirty;
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   const parsedAmount = Number(amountInput);
   const isAmountValid = !Number.isNaN(parsedAmount) && parsedAmount > 0;
 
+  // 1. Create Checkout Mutation
   const checkoutMutation = useCallback(
     async (
       payload: { accountId: string; amount: number; currency: string },
@@ -63,22 +83,65 @@ export function PaymentsWorkspaceScreen({
     reset: resetCheckout,
   } = useMutationIntent(checkoutMutation, 'payments.checkout.create');
 
+  // 2. Approve Checkout Mutation (Previously inert, now wired)
+  const approveMutation = useCallback(
+    async (
+      payload: { approvalId: string; checkoutId: string },
+      correlationId: any,
+      idempotencyKey: any
+    ) => {
+      return paymentsApi.approveCheckout(
+        payload.approvalId,
+        payload.checkoutId,
+        correlationId
+      );
+    },
+    [paymentsApi]
+  );
+
+  const {
+    state: approveIntent,
+    execute: executeApprove,
+    confirm: confirmApprove,
+    reset: resetApprove,
+  } = useMutationIntent(approveMutation, 'payments.checkout.approve');
+
   const handlePrepareCheckout = () => {
     if (!accountId.trim()) {
-      setValidationError('Recipient payment account ID is required.');
+      setCreateValidationError('Recipient payment account ID is required.');
       return;
     }
     if (!isAmountValid) {
-      setValidationError('Enter a valid positive payment amount.');
+      setCreateValidationError('Enter a valid positive payment amount.');
       return;
     }
-    setValidationError(null);
+    setCreateValidationError(null);
     // Tier T3 policy: requiresConfirm = true
     executeCheckout(
       {
         accountId: accountId.trim(),
         amount: parsedAmount,
         currency: currency.trim().toUpperCase(),
+      },
+      true
+    );
+  };
+
+  const handlePrepareApprove = () => {
+    if (!approvalId.trim()) {
+      setApproveValidationError('Approval ticket ID is required.');
+      return;
+    }
+    if (!checkoutIdToApprove.trim()) {
+      setApproveValidationError('Checkout ID is required.');
+      return;
+    }
+    setApproveValidationError(null);
+    // Tier T3 policy: requiresConfirm = true
+    executeApprove(
+      {
+        approvalId: approvalId.trim(),
+        checkoutId: checkoutIdToApprove.trim(),
       },
       true
     );
@@ -93,6 +156,14 @@ export function PaymentsWorkspaceScreen({
         } on account "${accountId}"`}
         onConfirm={confirmCheckout}
         onReset={resetCheckout}
+        onInspectActivity={onInspectJobs}
+      />
+
+      <IntentStatusBanner
+        state={approveIntent}
+        operationSummary={`Approve and disburse checkout "${checkoutIdToApprove}" with approval ticket "${approvalId}"`}
+        onConfirm={confirmApprove}
+        onReset={resetApprove}
         onInspectActivity={onInspectJobs}
       />
 
@@ -112,6 +183,8 @@ export function PaymentsWorkspaceScreen({
               onChangeText={setAccountId}
               placeholder="e.g. acct_paymongo_primary"
               editable={canCreateCheckout && checkoutIntent.phase !== 'Submitting'}
+              required
+              onClear={() => setAccountId('')}
             />
           </View>
           <View className={isCompact ? 'w-full' : 'w-44'}>
@@ -122,6 +195,8 @@ export function PaymentsWorkspaceScreen({
               keyboardType="decimal-pad"
               placeholder="0.00"
               editable={canCreateCheckout && checkoutIntent.phase !== 'Submitting'}
+              required
+              onClear={() => setAmountInput('')}
             />
           </View>
           <View className={isCompact ? 'w-full' : 'w-32'}>
@@ -131,17 +206,19 @@ export function PaymentsWorkspaceScreen({
               onChangeText={setCurrency}
               placeholder="PHP"
               editable={canCreateCheckout && checkoutIntent.phase !== 'Submitting'}
+              required
+              onClear={() => setCurrency('')}
             />
           </View>
         </View>
 
-        {validationError ? (
+        {createValidationError ? (
           <Text className="text-xs font-medium text-status-dangerText mb-3">
-            × {validationError}
+            × {createValidationError}
           </Text>
         ) : null}
 
-        {/* Pre-Confirmation Locked Summary Box */}
+        {/* Pre-Confirmation Locked Summary Box with Consequence Notice */}
         <SurfaceCard variant="subtle" padding="md">
           <Text className="text-xs font-semibold uppercase text-canvas-500 dark:text-canvas-400 mb-2">
             Transaction Review Summary
@@ -158,6 +235,9 @@ export function PaymentsWorkspaceScreen({
               {currency.toUpperCase()} {isAmountValid ? parsedAmount.toFixed(2) : '0.00'}
             </Text>
           </View>
+          <Text className="text-xs text-status-warningText mt-2">
+            Notice: Submitting will reserve settlement funds. Tier T3 requires confirmation before execution.
+          </Text>
         </SurfaceCard>
 
         <View className="mt-4 flex-row flex-wrap gap-3">
@@ -165,6 +245,7 @@ export function PaymentsWorkspaceScreen({
             label="Review & Confirm Checkout"
             onPress={handlePrepareCheckout}
             disabled={!canCreateCheckout}
+            disabledReason={!canCreateCheckout ? 'Missing payments.checkout.create permission' : undefined}
             isSubmitting={checkoutIntent.phase === 'Submitting'}
             submittingLabel="Submitting checkout…"
             variant="primary"
@@ -180,7 +261,8 @@ export function PaymentsWorkspaceScreen({
         <SurfaceCard variant="elevated" padding="lg">
           <SectionHeader
             title="Approve Pending Checkout"
-            description="Authorize a checkout awaiting secondary supervisor approval."
+            description="Authorize a checkout awaiting secondary supervisor approval (Tier T3). Permanently releases payment settlement."
+            action={<Badge label="Tier T3 Mutation" tone="warning" />}
           />
           <View className={isCompact ? 'flex-col' : 'flex-row gap-4'}>
             <View className="flex-1">
@@ -189,6 +271,9 @@ export function PaymentsWorkspaceScreen({
                 value={approvalId}
                 onChangeText={setApprovalId}
                 placeholder="Enter approval reference ID"
+                required
+                onClear={() => setApprovalId('')}
+                editable={approveIntent.phase !== 'Submitting'}
               />
             </View>
             <View className="flex-1">
@@ -197,20 +282,49 @@ export function PaymentsWorkspaceScreen({
                 value={checkoutIdToApprove}
                 onChangeText={setCheckoutIdToApprove}
                 placeholder="Enter checkout ID"
+                required
+                onClear={() => setCheckoutIdToApprove('')}
+                editable={approveIntent.phase !== 'Submitting'}
               />
             </View>
           </View>
-          <ActionButton
-            label="Approve Checkout"
-            disabled={!approvalId.trim() || !checkoutIdToApprove.trim()}
-            onPress={() => {
-              // Dispatches through paymentsApi when both IDs are provided
-            }}
-            variant="secondary"
-          />
+
+          {approveValidationError ? (
+            <Text className="text-xs font-medium text-status-dangerText mb-3">
+              × {approveValidationError}
+            </Text>
+          ) : null}
+
+          <View className="mb-4">
+            <SurfaceCard variant="subtle" padding="sm">
+              <Text className="text-xs text-status-dangerText font-medium">
+                Consequence: Approving this checkout will immediately authorize settlement and debit funds from the destination account. This action cannot be reversed.
+              </Text>
+            </SurfaceCard>
+          </View>
+
+          <View className="flex-row flex-wrap gap-3">
+            <ActionButton
+              label="Review & Approve Checkout"
+              disabled={!approvalId.trim() || !checkoutIdToApprove.trim() || !canApproveCheckout}
+              disabledReason={
+                !canApproveCheckout
+                  ? 'Missing payments.checkout.approve permission'
+                  : !approvalId.trim() || !checkoutIdToApprove.trim()
+                  ? 'Enter both Approval Ticket ID and Checkout ID'
+                  : undefined
+              }
+              onPress={handlePrepareApprove}
+              isSubmitting={approveIntent.phase === 'Submitting'}
+              submittingLabel="Approving checkout…"
+              variant="primary"
+            />
+            {approveIntent.phase !== 'Idle' && (
+              <ActionButton label="Reset Approval Form" onPress={resetApprove} variant="secondary" />
+            )}
+          </View>
         </SurfaceCard>
       )}
     </View>
   );
 }
-

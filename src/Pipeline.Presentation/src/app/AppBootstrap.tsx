@@ -53,10 +53,38 @@ export function AppBootstrap() {
   const [operatorInputId] = useState<string>('operator@pipeline.local');
   const [supportBundleJson, setSupportBundleJson] = useState<string | null>(null);
 
+  // Unsaved Changes Navigation Guard state
+  const [hasUnsavedWork, setHasUnsavedWork] = useState(false);
+  const [pendingNavDestination, setPendingNavDestination] = useState<string | null>(null);
+
   const sheetsApi = useMemo(() => createSheetsApi(defaultBridge), []);
   const paymentsApi = useMemo(() => createPaymentsApi(defaultBridge), []);
   const gmailApi = useMemo(() => createGmailApi(defaultBridge), []);
   const jobsApi = useMemo(() => createJobsApi(defaultBridge), []);
+
+  const handleNavigate = useCallback(
+    (destId: string) => {
+      if (destId === activeFeatureId) return;
+      if (hasUnsavedWork) {
+        setPendingNavDestination(destId);
+        return;
+      }
+      setActiveFeatureId(destId);
+    },
+    [activeFeatureId, hasUnsavedWork]
+  );
+
+  const handleConfirmDiscardAndNavigate = useCallback(() => {
+    if (pendingNavDestination) {
+      setHasUnsavedWork(false);
+      setActiveFeatureId(pendingNavDestination);
+      setPendingNavDestination(null);
+    }
+  }, [pendingNavDestination]);
+
+  const handleCancelNavigation = useCallback(() => {
+    setPendingNavDestination(null);
+  }, []);
 
   const establishDefaultSession = useCallback(() => {
     setSession(operatorInputId.trim() || 'operator@pipeline.local', {
@@ -94,6 +122,13 @@ export function AppBootstrap() {
     () => FEATURE_REGISTRY.find((f) => f.id === activeFeatureId) ?? FEATURE_REGISTRY[1],
     [activeFeatureId]
   );
+
+  const breadcrumbTrail: readonly string[] = useMemo(() => {
+    return [
+      'Workspace',
+      activeFeature.id === 'dashboard' ? 'Overview' : activeFeature.name,
+    ];
+  }, [activeFeature]);
 
   // Derive real ScreenLifecycleState (Rule R-06) from actual session and capability state
   const derivedScreenState: ScreenLifecycleState = useMemo(() => {
@@ -139,11 +174,14 @@ export function AppBootstrap() {
       }
       navItems={navItems}
       activeNavId={activeFeatureId}
-      onSelectNav={setActiveFeatureId}
+      onSelectNav={handleNavigate}
       sidebarOpen={sidebarOpen}
       onToggleSidebar={toggleSidebar}
       sessionStatusLabel={isAuthenticated ? 'Authenticated' : 'Not signed in'}
       sessionAuthenticated={isAuthenticated}
+      breadcrumbTrail={breadcrumbTrail}
+      canNavigateBack={activeFeatureId !== 'dashboard'}
+      onNavigateBack={() => handleNavigate('dashboard')}
       headerActions={
         !isAuthenticated ? (
           <ActionButton
@@ -172,6 +210,35 @@ export function AppBootstrap() {
           Registered Features: {FEATURE_REGISTRY.map((f) => f.id).join(', ')}
         </Text>
       </View>
+
+      {/* Unsaved Changes Navigation Guard Warning Banner */}
+      {pendingNavDestination && (
+        <View className="mb-6">
+          <SurfaceCard variant="accent" padding="md">
+            <View className="flex-row items-center justify-between mb-2">
+              <Badge label="Unsaved Changes Warning" tone="warning" />
+            </View>
+            <Text className="text-base font-semibold text-canvas-900 dark:text-canvas-50 mb-1">
+              You have unsaved changes in this workspace
+            </Text>
+            <Text className="text-xs text-canvas-600 dark:text-canvas-300 mb-3">
+              Switching workspaces will discard all uncommitted edits. Would you like to discard your edits and continue to {pendingNavDestination}, or stay on the current screen?
+            </Text>
+            <View className="flex-row flex-wrap gap-3">
+              <ActionButton
+                label="Discard Edits & Switch"
+                onPress={handleConfirmDiscardAndNavigate}
+                variant="destructive"
+              />
+              <ActionButton
+                label="Stay Here & Keep Editing"
+                onPress={handleCancelNavigation}
+                variant="secondary"
+              />
+            </View>
+          </SurfaceCard>
+        </View>
+      )}
 
       <ScreenStateView
         state={derivedScreenState}
@@ -268,7 +335,7 @@ export function AppBootstrap() {
                         <ActionButton
                           label="Open Workspace"
                           variant="secondary"
-                          onPress={() => setActiveFeatureId(feature.id)}
+                          onPress={() => handleNavigate(feature.id)}
                         />
                       </SurfaceCard>
                     </View>
@@ -286,7 +353,7 @@ export function AppBootstrap() {
                   <ActionButton
                     label="View Job History"
                     variant="tertiary"
-                    onPress={() => setActiveFeatureId('jobs')}
+                    onPress={() => handleNavigate('jobs')}
                   />
                 }
               />
@@ -322,6 +389,7 @@ export function AppBootstrap() {
           <SheetsWorkspaceScreen
             api={sheetsApi}
             canWrite={hasPermission('sheets.values.write')}
+            onDirtyChange={setHasUnsavedWork}
           />
         )}
 
@@ -330,6 +398,7 @@ export function AppBootstrap() {
           <GmailWorkspaceScreen
             api={gmailApi}
             canSend={hasPermission('gmail.messages.send')}
+            onDirtyChange={setHasUnsavedWork}
           />
         )}
 
@@ -339,7 +408,8 @@ export function AppBootstrap() {
             api={paymentsApi}
             canCreateCheckout={hasPermission('payments.checkout.create')}
             canApproveCheckout={hasPermission('payments.checkout.approve')}
-            onInspectJobs={() => setActiveFeatureId('jobs')}
+            onInspectJobs={() => handleNavigate('jobs')}
+            onDirtyChange={setHasUnsavedWork}
           />
         )}
 
