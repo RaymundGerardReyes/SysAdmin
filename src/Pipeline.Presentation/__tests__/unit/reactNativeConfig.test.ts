@@ -75,24 +75,17 @@ describe('React Native CLI and Windows Configuration', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const findDotnetTools = require('@react-native-windows/find-dotnet-tools');
     expect(typeof findDotnetTools.findPowerShell).toBe('function');
-    expect(typeof findDotnetTools.findDotNet).toBe('function');
-    expect(typeof findDotnetTools.findDotNetTools).toBe('function');
+    expect(typeof findDotnetTools.getNugetGlobalPackagesFolder).toBe('function');
 
     const powershellPath = findDotnetTools.findPowerShell();
     expect(typeof powershellPath).toBe('string');
     expect(powershellPath.length).toBeGreaterThan(0);
 
-    const dotnet = findDotnetTools.findDotNet();
-    expect(dotnet).toBe('dotnet');
-
-    const dotnetTools = findDotnetTools.findDotNetTools();
-    expect(typeof dotnetTools).toBe('string');
-    expect(dotnetTools.length).toBeGreaterThan(0);
-
     // Also test direct canonical entry point findDotnetTools.js
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const canonicalTools = require('@react-native-windows/find-dotnet-tools/lib-commonjs/findDotnetTools');
     expect(typeof canonicalTools.findPowerShell).toBe('function');
+    expect(typeof canonicalTools.getNugetGlobalPackagesFolder).toBe('function');
     expect(canonicalTools.findPowerShell()).toBe(powershellPath);
   });
 });

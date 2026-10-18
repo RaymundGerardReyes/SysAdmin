@@ -1,0 +1,8 @@
+<Project>
+  <!-- Prevents React Native Windows C++/UWP projects from inheriting root .NET Directory.Build.props -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <NoWarn>$(NoWarn);NU1507;NU1008</NoWarn>
+  </PropertyGroup>
+</Project>
+

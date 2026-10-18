@@ -1,0 +1,9 @@
+<Project>
+  <!-- Prevents React Native Windows C++/UWP projects from inheriting root .NET Central Package Management -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+    <NoWarn>$(NoWarn);NU1507;NU1008</NoWarn>
+  </PropertyGroup>
+</Project>
+
