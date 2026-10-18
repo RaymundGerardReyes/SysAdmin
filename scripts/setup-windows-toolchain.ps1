@@ -125,8 +125,20 @@ $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIden
 if (-not $isAdmin) {
     Write-Host "Requesting elevation..." -ForegroundColor Cyan
     $argList = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" install -Arch $Arch"
-    $proc = Start-Process -FilePath "powershell.exe" -ArgumentList $argList -Verb RunAs -Wait -PassThru
-    exit $proc.ExitCode
+    try {
+        $proc = Start-Process -FilePath "powershell.exe" -ArgumentList $argList -Verb RunAs -Wait -PassThru
+        exit $proc.ExitCode
+    }
+    catch {
+        Write-Host "Could not request elevation ($($_.Exception.Message))." -ForegroundColor Red
+        Write-Host "Do ONE of the following manually:" -ForegroundColor Yellow
+        Write-Host "  A) Open 'Windows PowerShell' as Administrator and run:" -ForegroundColor Yellow
+        Write-Host "       & `"$PSCommandPath`" install" -ForegroundColor Yellow
+        Write-Host "  B) Visual Studio Installer > '$($target.displayName)' > Modify > tick" -ForegroundColor Yellow
+        Write-Host "     'Desktop development with C++', 'WinUI application development'" -ForegroundColor Yellow
+        Write-Host "     and '.NET desktop development' > Modify." -ForegroundColor Yellow
+        exit 1
+    }
 }
 
 $installArgs = @("modify", "--installPath", "`"$($target.installationPath)`"", "--passive", "--norestart", "--includeRecommended")
