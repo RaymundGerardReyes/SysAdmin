@@ -1,43 +1,43 @@
 /**
- * Automated postinstall patch for @react-native-windows/find-dotnet-tools
+ * Automated postinstall patch for React Native Windows toolchain
  *
  * Rules: R-01, B-01
  *
- * Problem:
- * Microsoft's findPowerShell() executes `where pwsh.exe`. If PowerShell 7 (pwsh.exe)
- * is not installed on the system PATH, it prints stderr noise and throws:
- * "Unable to find pwsh.exe. It should have been made available by yarn install."
- * This unhandled exception crashes @react-native-windows/cli at module load time,
- * causing react-native.config.js to silently drop Windows commands ('run-windows').
- *
- * Solution:
- * Patch findDotnetTools.js to mute stderr on `where` queries and safely fall back
- * to standard Windows PowerShell (powershell.exe), which is universally present on Windows.
+ * Addresses:
+ * 1. @react-native-windows/find-dotnet-tools:
+ *    Fallback to standard Windows PowerShell (powershell.exe) when PowerShell 7 (pwsh.exe) is absent.
+ * 2. @react-native-windows/cli (WindowsStoreAppUtils.psm1):
+ *    - In EnableDevMode: On modern Windows 10/11, AllowDevelopmentWithoutDevLicense = 1 indicates
+ *      Developer Mode is active. Returns immediately if active, preventing unnecessary and failing
+ *      UAC elevation attempts for legacy AllowAllTrustedApps.
+ *    - In Invoke-ElevatedScriptBlock: Resolves powershell.exe if pwsh.exe is not found in $PSHOME.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const targetFile = path.resolve(
-  __dirname,
-  '../node_modules/@react-native-windows/find-dotnet-tools/lib-commonjs/findDotnetTools.js'
-);
+function patchFindDotnetTools() {
+  const targetFile = path.resolve(
+    __dirname,
+    '../node_modules/@react-native-windows/find-dotnet-tools/lib-commonjs/findDotnetTools.js'
+  );
 
-if (!fs.existsSync(targetFile)) {
-  console.log('[patch-rnw] @react-native-windows/find-dotnet-tools not found, skipping patch.');
-  process.exit(0);
-}
+  if (!fs.existsSync(targetFile)) {
+    console.log('[patch-rnw] @react-native-windows/find-dotnet-tools not found, skipping.');
+    return;
+  }
 
-let content = fs.readFileSync(targetFile, 'utf8');
+  let content = fs.readFileSync(targetFile, 'utf8');
 
-if (content.includes('where powershell.exe') || content.includes('powershell.exe')) {
-  console.log('[patch-rnw] findDotnetTools.js already patched with powershell fallback.');
-  process.exit(0);
-}
+  if (content.includes('where.exe powershell.exe') || content.includes('/* [patch-rnw-dotnet] */')) {
+    console.log('[patch-rnw] findDotnetTools.js already patched with powershell fallback.');
+    return;
+  }
 
-const unpatchedPattern = /function findPowerShell\(\) \{[\s\S]*?throw new Error\('Unable to find pwsh\.exe[\s\S]*?\}/;
+  const unpatchedPattern = /function findPowerShell\(\) \{[\s\S]*?throw new Error\('Unable to find pwsh\.exe[\s\S]*?\}/;
 
-const patchedImplementation = `function findPowerShell() {
+  const patchedImplementation = `/* [patch-rnw-dotnet] */
+function findPowerShell() {
     // Build agents already have PowerShell (pwsh) installed
     if (!process.env.TF_BUILD) {
         const nugetPackages = getNugetGlobalPackagesFolder();
@@ -67,11 +67,93 @@ const patchedImplementation = `function findPowerShell() {
     throw new Error('Unable to find pwsh.exe or powershell.exe.');
 }`;
 
-if (unpatchedPattern.test(content)) {
-  content = content.replace(unpatchedPattern, patchedImplementation);
-  fs.writeFileSync(targetFile, content, 'utf8');
-  console.log('[patch-rnw] Successfully patched findDotnetTools.js with silent stderr and powershell.exe fallback.');
-} else {
-  console.warn('[patch-rnw] findPowerShell pattern did not match. Please verify findDotnetTools.js structure.');
+  if (unpatchedPattern.test(content)) {
+    content = content.replace(unpatchedPattern, patchedImplementation);
+    fs.writeFileSync(targetFile, content, 'utf8');
+    console.log('[patch-rnw] Successfully patched findDotnetTools.js with powershell.exe fallback.');
+  } else {
+    console.warn('[patch-rnw] findPowerShell pattern did not match in findDotnetTools.js.');
+  }
 }
 
+function patchWindowsStoreAppUtils() {
+  const psm1File = path.resolve(
+    __dirname,
+    '../node_modules/@react-native-windows/cli/src/powershell/WindowsStoreAppUtils.psm1'
+  );
+
+  if (!fs.existsSync(psm1File)) {
+    console.log('[patch-rnw] WindowsStoreAppUtils.psm1 not found, skipping.');
+    return;
+  }
+
+  let content = fs.readFileSync(psm1File, 'utf8');
+
+  if (content.includes('# [patch-rnw-devmode]')) {
+    console.log('[patch-rnw] WindowsStoreAppUtils.psm1 already patched for Developer Mode.');
+    return;
+  }
+
+  // 1. Patch EnableDevmode to verify Developer Mode via AllowDevelopmentWithoutDevLicense first
+  const enableDevModeRegex = /function EnableDevmode\s*\{[\s\S]*?# SDL FIX: Direct cmdlet invocation for AllowAllTrustedApps[\s\S]*?\n    \}/;
+
+  const patchedEnableDevMode = `function EnableDevmode {
+    # [patch-rnw-devmode]
+    $RegistryKeyPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock"
+
+    # On Windows 10/11, AllowDevelopmentWithoutDevLicense = 1 is the canonical Developer Mode indicator
+    $devMode = Get-ItemProperty -Path $RegistryKeyPath -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue
+    if ($devMode -ne $null -and $devMode.AllowDevelopmentWithoutDevLicense -eq 1) {
+        Write-Verbose "Developer mode is already enabled in registry."
+        return
+    }
+
+    # Attempt enabling if missing
+    if (-not(Test-Path -Path $RegistryKeyPath)) {
+        if (!(IsElevated)) {
+            $scriptBlock = {
+                param($Path)
+                New-Item -Path $Path -ItemType Directory -Force | Out-Null
+            }
+            Invoke-ElevatedScriptBlock -ScriptBlock $scriptBlock -ArgumentList @($RegistryKeyPath)
+        }
+        else {
+            New-Item -Path $RegistryKeyPath -ItemType Directory -Force | Out-Null
+        }
+    }
+
+    $value = Get-ItemProperty -Path $RegistryKeyPath -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue
+    if (($value -eq $null) -or ($value.AllowDevelopmentWithoutDevLicense -ne 1)) {
+        if (!(IsElevated)) {
+            $scriptBlock = {
+                param($Path, $Name, $Value)
+                Set-ItemProperty -Path $Path -Name $Name -Value $Value -ErrorAction Stop
+            }
+            Invoke-ElevatedScriptBlock -ScriptBlock $scriptBlock -ArgumentList @($RegistryKeyPath, 'AllowDevelopmentWithoutDevLicense', 1)
+        }
+        else {
+            Set-ItemProperty -Path $RegistryKeyPath -Name AllowDevelopmentWithoutDevLicense -Value 1 -ErrorAction Stop
+        }
+    }
+}`;
+
+  if (enableDevModeRegex.test(content)) {
+    content = content.replace(enableDevModeRegex, patchedEnableDevMode);
+    console.log('[patch-rnw] Patched EnableDevmode in WindowsStoreAppUtils.psm1.');
+  } else {
+    console.warn('[patch-rnw] EnableDevmode pattern did not match in WindowsStoreAppUtils.psm1.');
+  }
+
+  // 2. Patch Invoke-ElevatedScriptBlock to fallback from pwsh.exe to powershell.exe
+  const pwshExeRegex = /\$process = Start-Process -FilePath "\$PSHOME\\pwsh\.exe"/;
+  if (pwshExeRegex.test(content)) {
+    const pwshFallback = `$psExe = if (Test-Path "$PSHOME\\pwsh.exe") { "$PSHOME\\pwsh.exe" } else { "$PSHOME\\powershell.exe" }\n        $process = Start-Process -FilePath $psExe`;
+    content = content.replace(pwshExeRegex, pwshFallback);
+    console.log('[patch-rnw] Patched Invoke-ElevatedScriptBlock in WindowsStoreAppUtils.psm1 with powershell.exe fallback.');
+  }
+
+  fs.writeFileSync(psm1File, content, 'utf8');
+}
+
+patchFindDotnetTools();
+patchWindowsStoreAppUtils();

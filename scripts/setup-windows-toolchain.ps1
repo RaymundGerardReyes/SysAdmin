@@ -91,6 +91,12 @@ foreach ($vs in (Get-VsInstances | Sort-Object { [version]$_.installationVersion
     Write-Status $vs.displayName ($versionOk -and $vcOk) $detail
 }
 
+$devKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock"
+$devProp = Get-ItemProperty -Path $devKey -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue
+$devOk = ($devProp -ne $null -and $devProp.AllowDevelopmentWithoutDevLicense -eq 1)
+$devDetail = if ($devOk) { "AllowDevelopmentWithoutDevLicense=1" } else { "DISABLED or unconfigured (Enable in Settings -> System -> For developers)" }
+Write-Status "Windows Developer Mode" $devOk $devDetail
+
 if ($ready.Count -gt 0) {
     Write-Host "`nREADY: RNW CLI will use MSBuild from $($ready[0])" -ForegroundColor Green
     Write-Host "Next: cd src/Pipeline.Presentation; npm run windows"
