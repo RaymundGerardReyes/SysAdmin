@@ -24,9 +24,10 @@ export class PipelineBridge {
     const envelope = createBridgeEnvelope(commandName, payload, correlationId, idempotencyKey);
     const timeoutMs = getTimeoutMsForCommand(descriptor.mutating);
 
+    let timerId: ReturnType<typeof setTimeout> | undefined;
     try {
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('BRIDGE_TIMEOUT')), timeoutMs);
+        timerId = setTimeout(() => reject(new Error('BRIDGE_TIMEOUT')), timeoutMs);
       });
 
       const responsePromise = this.transport.send<TReq, TRes>(envelope);
@@ -46,6 +47,10 @@ export class PipelineBridge {
         return err(createAppError('TIMEOUT', `Command '${commandName}' timed out after ${timeoutMs}ms`, correlationId));
       }
       return err(createAppError('BRIDGE_CONTRACT_MISMATCH', msg, correlationId));
+    } finally {
+      if (timerId !== undefined) {
+        clearTimeout(timerId);
+      }
     }
   }
 }

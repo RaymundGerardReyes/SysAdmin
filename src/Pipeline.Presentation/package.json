@@ -1,6 +1,6 @@
 {
   "name": "@pipeline/presentation",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "private": true,
   "description": "Pipeline Presentation: React Native (Windows + iOS) + Expo Modules + NativeWind v4",
   "engines": {
@@ -50,5 +50,12 @@
     "ts-jest": "^29.4.15",
     "ts-node": "^10.9.2",
     "typescript": "~5.8.3"
+  },
+  "overrides": {
+    "braces": "^3.0.3",
+    "micromatch": "^4.0.8",
+    "postcss": "^8.5.30",
+    "postcss-selector-parser": "^7.1.6",
+    "@xmldom/xmldom": "^0.9.12"
   }
 }
