@@ -25,3 +25,9 @@ Always enforce these architectural invariants when creating, modifying, or revie
 ## 4. Testing & Traceability Discipline
 - **Backend Tests:** Every test class must carry `[Trait("Category", "...")]` (`Unit`, `Path`, `Architecture`, `Api`, `Integration`, `Contract`, `Security`, `Regression`, `Sandbox`). Maintain 100% coverage of `AUTHZ_P01`..`AUTHZ_P11`, `AUTHZ_PX`, and `IDEM_P01`..`IDEM_P05`.
 - **Frontend Tests:** Core, bridge, security, intent, and observability files must include a file header citing their rule IDs (`Rules: R-xx, B-xx, L-xx`), and test names must prefix `[RuleID]` so `npm run check:trace` passes.
+
+## 5. Frontend Runner, Dependency & Resource Invariants
+- **React Native CLI as Primary Runner (`R-01`, `B-01`):** Because Windows is the primary desktop target and Expo CLI disables Windows (`windows: null`), development and build workflows must execute through React Native CLI scripts (`npm run dev` / `npm start` -> `react-native start`, `npm run windows` -> `react-native run-windows`). Never invoke `npx expo run` directly (Expo CLI relies on legacy Metro internal subpaths that fail under Node 22 package encapsulation in Metro 0.83+).
+- **Prohibition on `npm audit fix --force`:** Never run `npm audit fix --force`. It destabilizes the React Native Windows, Expo, and NativeWind peer dependency matrix by downgrading/upgrading packages across major breaking boundaries. Address transitive CVEs exclusively via the `"overrides"` block in `package.json` after verifying compatibility.
+- **Mandatory `clearTimeout` in `finally`:** Any timeout promise used with `Promise.race` (such as command timeouts in `PipelineBridge`) must store the timer identifier and invoke `clearTimeout(timerId)` inside a `finally` block to ensure immediate event loop cleanup and prevent lingering handles (`jest --detectOpenHandles`).
+
