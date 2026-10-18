@@ -1,8 +1,24 @@
 <Project>
-  <!-- Prevents React Native Windows C++/UWP projects from inheriting root .NET Directory.Build.props -->
   <PropertyGroup>
+    <!-- Isolate React Native Windows from root .NET Central Package Management -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
     <NoWarn>$(NoWarn);NU1507;NU1008</NoWarn>
-  </PropertyGroup>
-</Project>
 
+    <!-- Prevent MSBuild and C++/WinRT from exhausting Windows Virtual Memory (0x800705AF) -->
+    <UseMultiToolTask>false</UseMultiToolTask>
+    <EnforceProcessCountAcrossBuilds>true</EnforceProcessCountAcrossBuilds>
+    <EnableClServerMode>false</EnableClServerMode>
+    <UseSharedCompilation>false</UseSharedCompilation>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <!-- Cap parallel CL.exe compiler threads per project to prevent RAM spikes -->
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ProcessorNumber>2</ProcessorNumber>
+      <!-- Reduce precompiled header memory reservation to 75% of default -->
+      <AdditionalOptions>%(AdditionalOptions) /Zm75</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+</Project>

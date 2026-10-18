@@ -1,6 +1,6 @@
 {
   "name": "@pipeline/presentation",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "private": true,
   "description": "Pipeline Presentation: React Native (Windows + iOS) + Expo Modules + NativeWind v4",
   "main": "index.js",
@@ -14,7 +14,7 @@
     "start": "react-native start",
     "dev": "react-native start",
     "prewindows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ../../scripts/setup-windows-toolchain.ps1 check",
-    "windows": "react-native run-windows",
+    "windows": "powershell.exe -NoProfile -Command \"$env:MSBUILDDISABLENODEREUSE='1'; $env:CL='/MP2'; npx react-native run-windows --arch x64\"",
     "doctor:windows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ../../scripts/setup-windows-toolchain.ps1 check",
     "setup:windows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ../../scripts/setup-windows-toolchain.ps1 install",
     "ios": "react-native run-ios",
