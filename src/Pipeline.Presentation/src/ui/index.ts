@@ -8,4 +8,4 @@ export * from './primitives/FormField';
 export * from './primitives/EmptyState';
 export * from './primitives/IntentStatusBanner';
 export * from './primitives/ScreenStateView';
-
+export * from './primitives/IntegrationWorkspace';

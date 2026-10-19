@@ -1,5 +1,6 @@
 // Rules: R-08 Platform isolation, L-01 Layer 5 allowed imports only
 import React from 'react';
+import type { ThemePreference } from '../ui';
 
 export interface ShellNavItem {
   readonly id: string;
@@ -19,6 +20,8 @@ export interface PlatformShellProps {
   readonly onToggleSidebar?: (() => void) | undefined;
   readonly sessionStatusLabel?: string | undefined;
   readonly sessionAuthenticated?: boolean | undefined;
+  readonly themeMode?: ThemePreference | undefined;
+  readonly onSelectThemeMode?: ((mode: ThemePreference) => void) | undefined;
   readonly headerActions?: React.ReactNode | undefined;
   readonly breadcrumbTrail?: readonly string[] | undefined;
   readonly canNavigateBack?: boolean | undefined;

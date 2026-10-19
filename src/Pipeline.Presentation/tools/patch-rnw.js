@@ -89,14 +89,6 @@ function patchWindowsStoreAppUtils() {
 
   let content = fs.readFileSync(psm1File, 'utf8');
 
-  if (content.includes('# [patch-rnw-devmode]')) {
-    console.log('[patch-rnw] WindowsStoreAppUtils.psm1 already patched for Developer Mode.');
-    return;
-  }
-
-  // 1. Patch EnableDevmode to verify Developer Mode via AllowDevelopmentWithoutDevLicense first
-  const enableDevModeRegex = /function EnableDevmode\s*\{[\s\S]*?# SDL FIX: Direct cmdlet invocation for AllowAllTrustedApps[\s\S]*?\n    \}/;
-
   const patchedEnableDevMode = `function EnableDevmode {
     # [patch-rnw-devmode]
     $RegistryKeyPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock"
@@ -137,11 +129,22 @@ function patchWindowsStoreAppUtils() {
     }
 }`;
 
-  if (enableDevModeRegex.test(content)) {
-    content = content.replace(enableDevModeRegex, patchedEnableDevMode);
+  // Replace the complete function up to the next region comment. This remains
+  // stable across RNW security fixes and avoids leaving an old closing brace.
+  const enableDevModeStart = content.search(/function EnableDevmode\s*\{/i);
+  const nextRegionComment = enableDevModeStart >= 0
+    ? content.indexOf('\n#', enableDevModeStart)
+    : -1;
+
+  if (enableDevModeStart >= 0 && nextRegionComment >= 0) {
+    const lineBreak = content[nextRegionComment] === '\r' ? '\r\n' : '\n';
+    content = content.slice(0, enableDevModeStart)
+      + patchedEnableDevMode.replace(/\n/g, lineBreak)
+      + lineBreak + lineBreak
+      + content.slice(nextRegionComment + 1);
     console.log('[patch-rnw] Patched EnableDevmode in WindowsStoreAppUtils.psm1.');
   } else {
-    console.warn('[patch-rnw] EnableDevmode pattern did not match in WindowsStoreAppUtils.psm1.');
+    throw new Error('[patch-rnw] Could not locate the complete EnableDevmode function.');
   }
 
   // 2. Patch Invoke-ElevatedScriptBlock to fallback from pwsh.exe to powershell.exe

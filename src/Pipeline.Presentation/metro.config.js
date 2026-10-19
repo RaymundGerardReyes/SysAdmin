@@ -1,4 +1,5 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { withNativeWind } = require('nativewind/metro');
 
 /**
  * Metro configuration for Pipeline Presentation
@@ -18,4 +19,7 @@ const config = {
   },
 };
 
-module.exports = mergeConfig(defaultConfig, config);
+module.exports = withNativeWind(mergeConfig(defaultConfig, config), {
+  input: './src/global.css',
+  configPath: './tailwind.config.js',
+});

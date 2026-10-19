@@ -21,6 +21,8 @@ export function PlatformShell({
   onSelectNav,
   sessionStatusLabel = 'Session active',
   sessionAuthenticated = true,
+  themeMode = 'system',
+  onSelectThemeMode,
   headerActions,
   breadcrumbTrail,
   canNavigateBack = false,
@@ -32,6 +34,10 @@ export function PlatformShell({
   const primaryTabs = navItems.slice(0, 4);
   const secondaryTabs = navItems.slice(4);
   const isSecondaryActive = secondaryTabs.some((t) => t.id === activeNavId);
+  const cycleTheme = () => {
+    if (!onSelectThemeMode) return;
+    onSelectThemeMode(themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark');
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-canvas-50 dark:bg-canvas-950">
@@ -80,6 +86,18 @@ export function PlatformShell({
         </View>
 
         <View className="flex-row items-center gap-2">
+          {onSelectThemeMode && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cycle color theme"
+              onPress={cycleTheme}
+              className="min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-canvas-200 dark:border-canvas-700 bg-canvas-100 dark:bg-canvas-800"
+            >
+              <Text className="text-sm text-canvas-900 dark:text-canvas-50">
+                {themeMode === 'light' ? '☀' : themeMode === 'dark' ? '☾' : '◐'}
+              </Text>
+            </Pressable>
+          )}
           {headerActions}
           <Badge
             label={sessionStatusLabel}

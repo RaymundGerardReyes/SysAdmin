@@ -1,5 +1,5 @@
 // Rules: L-01 Layer 7 Composition Root, R-03 Cosmetic capability gating, R-06 Five screen states, N-06, N-07
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { FEATURE_REGISTRY } from './featureRegistry';
 import { PlatformShell, ShellNavItem } from '../platform/PlatformShell';
@@ -11,6 +11,7 @@ import {
   EmptyState,
   ScreenStateView,
   ScreenLifecycleState,
+  IntegrationWorkspace,
   useAppTheme,
 } from '../ui';
 import { useUiStore } from '../state/stores/uiStore';
@@ -39,13 +40,16 @@ const FEATURE_SYMBOLS: Record<string, string> = {
   gmail: '✉',
   payments: '◈',
   jobs: '⟳',
+  'zoho-expense': '⌁',
+  bigin: '◌',
+  chat: '◉',
   session: '⛨',
   diagnostics: '⚙',
 };
 
 export function AppBootstrap() {
-  const { isCompact, isExpanded } = useAppTheme();
-  const { sidebarOpen, toggleSidebar } = useUiStore();
+  const { isCompact, isExpanded, setColorScheme } = useAppTheme();
+  const { sidebarOpen, toggleSidebar, themeMode, setThemeMode } = useUiStore();
   const { isAuthenticated, userId, capabilities, setSession } = useSessionStore();
   const pendingOperations = usePendingOperationsStore((s) => s.operations);
 
@@ -56,6 +60,10 @@ export function AppBootstrap() {
   // Unsaved Changes Navigation Guard state
   const [hasUnsavedWork, setHasUnsavedWork] = useState(false);
   const [pendingNavDestination, setPendingNavDestination] = useState<string | null>(null);
+
+  useEffect(() => {
+    setColorScheme?.(themeMode);
+  }, [setColorScheme, themeMode]);
 
   const sheetsApi = useMemo(() => createSheetsApi(defaultBridge), []);
   const paymentsApi = useMemo(() => createPaymentsApi(defaultBridge), []);
@@ -146,7 +154,7 @@ export function AppBootstrap() {
   }, [activeFeature, capabilities, isAuthenticated]);
 
   const navItems: readonly ShellNavItem[] = useMemo(() => {
-    const orderedIds = ['dashboard', 'sheets', 'gmail', 'payments', 'jobs', 'session', 'diagnostics'];
+    const orderedIds = ['dashboard', 'sheets', 'gmail', 'chat', 'payments', 'zoho-expense', 'bigin', 'jobs', 'session', 'diagnostics'];
     return orderedIds
       .map((id) => FEATURE_REGISTRY.find((f) => f.id === id))
       .filter((f): f is NonNullable<typeof f> => Boolean(f))
@@ -179,6 +187,8 @@ export function AppBootstrap() {
       onToggleSidebar={toggleSidebar}
       sessionStatusLabel={isAuthenticated ? 'Authenticated' : 'Not signed in'}
       sessionAuthenticated={isAuthenticated}
+      themeMode={themeMode}
+      onSelectThemeMode={setThemeMode}
       breadcrumbTrail={breadcrumbTrail}
       canNavigateBack={activeFeatureId !== 'dashboard'}
       onNavigateBack={() => handleNavigate('dashboard')}
@@ -248,7 +258,7 @@ export function AppBootstrap() {
       >
         {/* 1. OVERVIEW DASHBOARD */}
         {activeFeature.id === 'dashboard' && (
-          <View className="space-y-6">
+          <View className="gap-6">
             {/* Session & Operational Readiness Summary */}
             <SurfaceCard variant="elevated" padding="lg">
               <SectionHeader
@@ -289,7 +299,7 @@ export function AppBootstrap() {
                 description="Select a tool to manage data, communications, payments, or background jobs."
               />
 
-              <View className={isCompact ? 'flex-col space-y-3' : 'flex-row flex-wrap -mx-2'}>
+              <View className={isCompact ? 'flex-col gap-3' : isExpanded ? 'flex-row flex-wrap gap-4' : 'flex-row flex-wrap gap-3'}>
                 {FEATURE_REGISTRY.filter((f) => f.id !== 'dashboard').map((feature) => {
                   const primaryPerm = feature.routes[0]?.requiredPermission;
                   const isPermitted = !primaryPerm || hasPermission(primaryPerm);
@@ -364,7 +374,7 @@ export function AppBootstrap() {
                   description="Operations you run across Sheets, Gmail, Payments, or Jobs will appear here with their verification status."
                 />
               ) : (
-                <View className="space-y-2">
+                <View className="gap-2">
                   {recentEvents.slice(-5).reverse().map((ev, i) => (
                     <View
                       key={`${ev.timestamp}-${i}`}
@@ -416,6 +426,22 @@ export function AppBootstrap() {
         {/* 5. JOBS WORKSPACE */}
         {activeFeature.id === 'jobs' && <JobsWorkspaceScreen api={jobsApi} />}
 
+        {(['zoho-expense', 'bigin', 'chat'] as const).includes(activeFeature.id as 'zoho-expense' | 'bigin' | 'chat') && (
+          <IntegrationWorkspace
+            name={activeFeature.name}
+            description={
+              activeFeature.id === 'zoho-expense'
+                ? 'Review and manage protected expense workflows through Zoho Expense.'
+                : activeFeature.id === 'bigin'
+                ? 'Review protected contacts and relationship workflows through Zoho Bigin.'
+                : 'Review protected spaces and messaging workflows through Google Chat.'
+            }
+            routes={activeFeature.routes.map((route) => route.name)}
+            canAccess={Boolean(activeFeature.routes[0]?.requiredPermission && hasPermission(activeFeature.routes[0].requiredPermission))}
+            onSignIn={establishDefaultSession}
+          />
+        )}
+
         {/* 6. SESSION & IDENTITY WORKSPACE */}
         {activeFeature.id === 'session' && (
           <SurfaceCard variant="elevated" padding="lg">
@@ -424,7 +450,7 @@ export function AppBootstrap() {
               description="Manage your active operator session and inspect granted permissions."
             />
             {isAuthenticated && capabilities ? (
-              <View className="space-y-4">
+              <View className="gap-4">
                 <View className="p-4 rounded-lg bg-canvas-100 dark:bg-canvas-800">
                   <Text className="text-sm font-semibold text-canvas-900 dark:text-canvas-50">
                     Signed in as: {userId}
@@ -454,7 +480,7 @@ export function AppBootstrap() {
                 />
               </View>
             ) : (
-              <View className="space-y-4">
+              <View className="gap-4">
                 <Text className="text-sm text-canvas-500 dark:text-canvas-400">
                   Select a session profile to authenticate with the workspace:
                 </Text>

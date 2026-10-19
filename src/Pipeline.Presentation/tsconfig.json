@@ -22,7 +22,8 @@
   "include": [
     "src/**/*",
     "__tests__/**/*",
-    "tools/**/*"
+    "tools/**/*",
+    "nativewind-env.d.ts"
   ],
   "exclude": [
     "node_modules",
