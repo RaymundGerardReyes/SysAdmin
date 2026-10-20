@@ -1,9 +1,10 @@
 import { create } from 'zustand';
+import type { ThemePreference } from '../../ui/theme/themeLogic';
 
 export interface UiState {
-  themeMode: 'light' | 'dark' | 'system';
+  themeMode: ThemePreference;
   sidebarOpen: boolean;
-  setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
+  setThemeMode: (mode: ThemePreference) => void;
   toggleSidebar: () => void;
 }
 

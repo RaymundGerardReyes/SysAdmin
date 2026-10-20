@@ -34,9 +34,11 @@ export function PlatformShell({
   const primaryTabs = navItems.slice(0, 4);
   const secondaryTabs = navItems.slice(4);
   const isSecondaryActive = secondaryTabs.some((t) => t.id === activeNavId);
+
   const cycleTheme = () => {
     if (!onSelectThemeMode) return;
-    onSelectThemeMode(themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark');
+    const next = themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark';
+    onSelectThemeMode(next);
   };
 
   return (
@@ -54,18 +56,17 @@ export function PlatformShell({
               className="min-h-[44px] min-w-[44px] mr-1 items-center justify-center rounded-md active:bg-canvas-100 dark:active:bg-canvas-800"
             >
               <Text className="text-base font-semibold text-accent-600 dark:text-accent-400">
-                ‹ Back
+                ← Back
               </Text>
             </Pressable>
           )}
-
           <View className="flex-1">
             {breadcrumbTrail && breadcrumbTrail.length > 0 && (
               <Text
                 numberOfLines={1}
                 className="text-xs text-canvas-500 dark:text-canvas-400 mb-0.5"
               >
-                {breadcrumbTrail.join(' › ')}
+                {breadcrumbTrail.join(' / ')}
               </Text>
             )}
             <Text
@@ -84,7 +85,6 @@ export function PlatformShell({
             ) : null}
           </View>
         </View>
-
         <View className="flex-row items-center gap-2">
           {onSelectThemeMode && (
             <Pressable
@@ -153,7 +153,7 @@ export function PlatformShell({
           keyboardShouldPersistTaps="handled"
           className="flex-1 px-4 py-4"
         >
-          <View className="pb-6">{children}</View>
+          <View className="pb-6 gap-5">{children}</View>
         </ScrollView>
       </KeyboardAvoidingView>
 

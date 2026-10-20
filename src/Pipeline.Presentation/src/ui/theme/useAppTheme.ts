@@ -2,21 +2,22 @@
 import { useWindowDimensions, useColorScheme as useRNColorScheme } from 'react-native';
 import { useColorScheme as useNativeWindColorScheme } from 'nativewind';
 import { tokens } from './tokens';
+import { getLayoutBreakpoint, resolveColorScheme } from './themeLogic';
 
-export type LayoutBreakpoint = 'compact' | 'medium' | 'expanded';
-export type ThemePreference = 'light' | 'dark' | 'system';
+export type { LayoutBreakpoint, ThemePreference, ColorScheme } from './themeLogic';
+export { getLayoutBreakpoint, resolveColorScheme } from './themeLogic';
 
 export function useAppTheme() {
   const { width, height } = useWindowDimensions();
-  const rnColorScheme = useRNColorScheme();
-  const nativeWindColorScheme = useNativeWindColorScheme();
+  const rnScheme = useRNColorScheme();
+  const nw = useNativeWindColorScheme();
 
-  let breakpoint: LayoutBreakpoint = 'compact';
-  if (width >= tokens.breakpoints.expandedMin) {
-    breakpoint = 'expanded';
-  } else if (width >= tokens.breakpoints.mediumMin) {
-    breakpoint = 'medium';
-  }
+  const activeColorScheme = resolveColorScheme(nw?.colorScheme, rnScheme);
+  const isDark = activeColorScheme === 'dark';
+  const breakpoint = getLayoutBreakpoint(width);
+
+  const gridCols = breakpoint === 'expanded' ? 3 : breakpoint === 'medium' ? 2 : 1;
+  const contentPadding = breakpoint === 'compact' ? 16 : 28;
 
   return {
     tokens,
@@ -26,8 +27,10 @@ export function useAppTheme() {
     isCompact: breakpoint === 'compact',
     isMedium: breakpoint === 'medium',
     isExpanded: breakpoint === 'expanded',
-    colorScheme: nativeWindColorScheme.colorScheme ?? rnColorScheme ?? 'light',
-    isDark: (nativeWindColorScheme.colorScheme ?? rnColorScheme ?? 'light') === 'dark',
-    setColorScheme: nativeWindColorScheme.setColorScheme,
+    gridCols,
+    contentPadding,
+    colorScheme: activeColorScheme,
+    isDark,
+    setColorScheme: nw?.setColorScheme,
   };
 }

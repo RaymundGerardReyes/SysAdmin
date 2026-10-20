@@ -1,5 +1,5 @@
 // Rules: L-01 Layer 7 Composition Root, R-03 Cosmetic capability gating, R-06 Five screen states, N-06, N-07
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { View, Text } from 'react-native';
 import { FEATURE_REGISTRY } from './featureRegistry';
 import { PlatformShell, ShellNavItem } from '../platform/PlatformShell';
@@ -53,6 +53,15 @@ export function AppBootstrap() {
   const { isAuthenticated, userId, capabilities, setSession } = useSessionStore();
   const pendingOperations = usePendingOperationsStore((s) => s.operations);
 
+  const setColorSchemeRef = useRef(setColorScheme);
+  useEffect(() => {
+    setColorSchemeRef.current = setColorScheme;
+  }, [setColorScheme]);
+
+  useEffect(() => {
+    setColorSchemeRef.current?.(themeMode);
+  }, [themeMode]);
+
   const [activeFeatureId, setActiveFeatureId] = useState<string>('dashboard');
   const [operatorInputId] = useState<string>('operator@pipeline.local');
   const [supportBundleJson, setSupportBundleJson] = useState<string | null>(null);
@@ -60,10 +69,6 @@ export function AppBootstrap() {
   // Unsaved Changes Navigation Guard state
   const [hasUnsavedWork, setHasUnsavedWork] = useState(false);
   const [pendingNavDestination, setPendingNavDestination] = useState<string | null>(null);
-
-  useEffect(() => {
-    setColorScheme?.(themeMode);
-  }, [setColorScheme, themeMode]);
 
   const sheetsApi = useMemo(() => createSheetsApi(defaultBridge), []);
   const paymentsApi = useMemo(() => createPaymentsApi(defaultBridge), []);
@@ -140,7 +145,11 @@ export function AppBootstrap() {
 
   // Derive real ScreenLifecycleState (Rule R-06) from actual session and capability state
   const derivedScreenState: ScreenLifecycleState = useMemo(() => {
-    if (activeFeature.id === 'dashboard' || activeFeature.id === 'session' || activeFeature.id === 'diagnostics') {
+    if (
+      activeFeature.id === 'dashboard' ||
+      activeFeature.id === 'session' ||
+      activeFeature.id === 'diagnostics'
+    ) {
       return 'success';
     }
     if (!isAuthenticated || !capabilities) {
@@ -154,7 +163,18 @@ export function AppBootstrap() {
   }, [activeFeature, capabilities, isAuthenticated]);
 
   const navItems: readonly ShellNavItem[] = useMemo(() => {
-    const orderedIds = ['dashboard', 'sheets', 'gmail', 'chat', 'payments', 'zoho-expense', 'bigin', 'jobs', 'session', 'diagnostics'];
+    const orderedIds = [
+      'dashboard',
+      'sheets',
+      'gmail',
+      'chat',
+      'payments',
+      'zoho-expense',
+      'bigin',
+      'jobs',
+      'session',
+      'diagnostics',
+    ];
     return orderedIds
       .map((id) => FEATURE_REGISTRY.find((f) => f.id === id))
       .filter((f): f is NonNullable<typeof f> => Boolean(f))
@@ -169,6 +189,7 @@ export function AppBootstrap() {
   }, [pendingOperations.size]);
 
   const recentEvents = breadcrumbs.getAll();
+
   const hasPermission = (perm: string) =>
     Boolean(capabilities?.permissions.includes(perm as any));
 
@@ -211,14 +232,21 @@ export function AppBootstrap() {
         )
       }
     >
-      {/* Workspace Header preserving core identity text */}
-      <View className="mb-6">
-        <Text className="text-2xl font-semibold tracking-tight text-canvas-900 dark:text-canvas-50">
-          Pipeline Presentation
-        </Text>
-        <Text className="text-xs text-canvas-500 dark:text-canvas-400 mt-1">
-          Registered Features: {FEATURE_REGISTRY.map((f) => f.id).join(', ')}
-        </Text>
+      {/* Minimalistic Workspace Identity Header */}
+      <View className="mb-6 flex-row flex-wrap items-baseline justify-between gap-2 pb-4 border-b border-canvas-200 dark:border-canvas-800">
+        <View>
+          <Text className="text-xl font-semibold tracking-tight text-canvas-900 dark:text-canvas-50">
+            Pipeline Presentation
+          </Text>
+          <Text className="text-xs text-canvas-500 dark:text-canvas-400 mt-0.5">
+            Registered Features: {FEATURE_REGISTRY.map((f) => f.id).join(', ')}
+          </Text>
+        </View>
+        <Badge
+          label={isAuthenticated ? `Role: ${capabilities?.roles[0] ?? 'Operator'}` : 'Preview Mode'}
+          tone={isAuthenticated ? 'accent' : 'neutral'}
+          showSymbol={false}
+        />
       </View>
 
       {/* Unsaved Changes Navigation Guard Warning Banner */}
@@ -275,7 +303,6 @@ export function AppBootstrap() {
                   />
                 }
               />
-
               {!isAuthenticated && (
                 <View className="flex-row flex-wrap gap-3 mt-2">
                   <ActionButton
@@ -292,32 +319,33 @@ export function AppBootstrap() {
               )}
             </SurfaceCard>
 
-            {/* Connected Workspaces Grid */}
+            {/* Connected Workspaces Responsive Grid */}
             <View>
               <SectionHeader
                 title="Connected Workspaces"
                 description="Select a tool to manage data, communications, payments, or background jobs."
               />
-
-              <View className={isCompact ? 'flex-col gap-3' : isExpanded ? 'flex-row flex-wrap gap-4' : 'flex-row flex-wrap gap-3'}>
+              <View className="flex-row flex-wrap -mx-2">
                 {FEATURE_REGISTRY.filter((f) => f.id !== 'dashboard').map((feature) => {
                   const primaryPerm = feature.routes[0]?.requiredPermission;
                   const isPermitted = !primaryPerm || hasPermission(primaryPerm);
-
                   return (
                     <View
                       key={feature.id}
                       className={
                         isCompact
-                          ? 'w-full mb-3'
+                          ? 'w-full px-2 mb-4'
                           : isExpanded
                           ? 'w-1/3 px-2 mb-4'
                           : 'w-1/2 px-2 mb-4'
                       }
                     >
                       <SurfaceCard variant="elevated" padding="md">
-                        <View className="flex-row items-center justify-between mb-2">
-                          <Text className="text-base font-semibold text-canvas-900 dark:text-canvas-50">
+                        <View className="flex-row items-center justify-between gap-2 mb-2">
+                          <Text
+                            numberOfLines={1}
+                            className="text-base font-semibold text-canvas-900 dark:text-canvas-50 flex-1"
+                          >
                             {FEATURE_SYMBOLS[feature.id] ?? '•'}  {feature.name}
                           </Text>
                           <Badge
@@ -337,11 +365,12 @@ export function AppBootstrap() {
                             }
                           />
                         </View>
-
-                        <Text className="text-xs text-canvas-500 dark:text-canvas-400 mb-4">
+                        <Text
+                          numberOfLines={1}
+                          className="text-xs text-canvas-500 dark:text-canvas-400 mb-4"
+                        >
                           {feature.routes.map((r) => r.name).join(' • ')}
                         </Text>
-
                         <ActionButton
                           label="Open Workspace"
                           variant="secondary"
@@ -367,14 +396,13 @@ export function AppBootstrap() {
                   />
                 }
               />
-
               {recentEvents.length === 0 ? (
                 <EmptyState
                   title="No recent activity in this session"
                   description="Operations you run across Sheets, Gmail, Payments, or Jobs will appear here with their verification status."
                 />
               ) : (
-                <View className="gap-2">
+                <View className="gap-1">
                   {recentEvents.slice(-5).reverse().map((ev, i) => (
                     <View
                       key={`${ev.timestamp}-${i}`}
@@ -383,7 +411,7 @@ export function AppBootstrap() {
                       <Text className="text-sm font-medium text-canvas-900 dark:text-canvas-50">
                         {ev.event}
                       </Text>
-                      <Text className="text-xs text-canvas-500 dark:text-canvas-400">
+                      <Text className="text-xs font-mono text-canvas-500 dark:text-canvas-400">
                         {ev.timestamp.slice(11, 19)} UTC
                       </Text>
                     </View>
@@ -426,6 +454,7 @@ export function AppBootstrap() {
         {/* 5. JOBS WORKSPACE */}
         {activeFeature.id === 'jobs' && <JobsWorkspaceScreen api={jobsApi} />}
 
+        {/* Zoho Expense, Bigin, and Chat Integration Workspaces */}
         {(['zoho-expense', 'bigin', 'chat'] as const).includes(activeFeature.id as 'zoho-expense' | 'bigin' | 'chat') && (
           <IntegrationWorkspace
             name={activeFeature.name}
