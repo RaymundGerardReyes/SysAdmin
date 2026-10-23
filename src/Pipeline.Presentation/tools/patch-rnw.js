@@ -158,5 +158,31 @@ function patchWindowsStoreAppUtils() {
   fs.writeFileSync(psm1File, content, 'utf8');
 }
 
+function patchJestUtil() {
+  const tryRealpathFile = path.resolve(
+    __dirname,
+    '../node_modules/jest-util/build/tryRealpath.js'
+  );
+
+  if (!fs.existsSync(tryRealpathFile)) {
+    return;
+  }
+
+  let content = fs.readFileSync(tryRealpathFile, 'utf8');
+  if (content.includes("error.code !== 'EPERM'")) {
+    return;
+  }
+
+  const unpatched = "if (error.code !== 'ENOENT' && error.code !== 'EISDIR')";
+  const patched = "if (error.code !== 'ENOENT' && error.code !== 'EISDIR' && error.code !== 'EPERM')";
+
+  if (content.includes(unpatched)) {
+    content = content.replace(unpatched, patched);
+    fs.writeFileSync(tryRealpathFile, content, 'utf8');
+    console.log('[patch-rnw] Patched jest-util/tryRealpath.js with EPERM tolerance.');
+  }
+}
+
 patchFindDotnetTools();
 patchWindowsStoreAppUtils();
+patchJestUtil();
