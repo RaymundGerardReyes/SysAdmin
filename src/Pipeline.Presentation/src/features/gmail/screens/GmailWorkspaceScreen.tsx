@@ -142,7 +142,7 @@ export function GmailWorkspaceScreen({
   };
 
   return (
-    <View className="space-y-6">
+    <View className="gap-6">
       <IntentStatusBanner
         state={sendIntent}
         operationSummary={`Send external email to "${recipientEmail}" with subject "${subject}"`}
@@ -253,7 +253,7 @@ export function GmailWorkspaceScreen({
             description="Operational emails dispatched during this session."
             action={<Badge label={`${sentMessages.length} sent`} tone="success" />}
           />
-          <View className="space-y-3">
+          <View className="gap-3">
             {sentMessages.map((msg) => (
               <SurfaceCard key={msg.id} variant="subtle" padding="sm">
                 <View className="flex-row items-center justify-between">

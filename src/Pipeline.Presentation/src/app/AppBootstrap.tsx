@@ -27,6 +27,25 @@ import { createSheetsApi } from '../features/sheets/api/sheetsApi';
 import { createPaymentsApi } from '../features/payments/api/paymentsApi';
 import { createGmailApi } from '../features/gmail/api/gmailApi';
 import { createJobsApi } from '../features/jobs/api/jobsApi';
+import { createBiginApi } from '../features/bigin/api/biginApi';
+import { createChatApi } from '../features/chat/api/chatApi';
+import { createZohoExpenseApi } from '../features/zoho-expense/api/zohoExpenseApi';
+import { useMutationIntent } from '../intent/useMutationIntent';
+import { createCorrelationId } from '../core/ids/correlationId';
+import {
+  BiginContactItemContract,
+  BiginModuleItemResponse,
+  BiginNotificationDetailsContract,
+  BiginOrgDetailsContract,
+  ChatMessageContract,
+  CreateBiginContactRequest,
+  CreateBiginContactResponse,
+  CreateChatMessageRequest,
+  CreateChatMessageResponse,
+  CreateZohoExpenseRequest,
+  CreateZohoExpenseResponse,
+  ZohoExpenseItemContract,
+} from '../contracts/dtos';
 import { SheetsWorkspaceScreen } from '../features/sheets/screens/SheetsWorkspaceScreen';
 import { PaymentsWorkspaceScreen } from '../features/payments/screens/PaymentsWorkspaceScreen';
 import { GmailWorkspaceScreen } from '../features/gmail/screens/GmailWorkspaceScreen';
@@ -74,6 +93,136 @@ export function AppBootstrap() {
   const paymentsApi = useMemo(() => createPaymentsApi(defaultBridge), []);
   const gmailApi = useMemo(() => createGmailApi(defaultBridge), []);
   const jobsApi = useMemo(() => createJobsApi(defaultBridge), []);
+  const biginApi = useMemo(() => createBiginApi(defaultBridge), []);
+  const chatApi = useMemo(() => createChatApi(defaultBridge), []);
+  const zohoExpenseApi = useMemo(() => createZohoExpenseApi(defaultBridge), []);
+
+  // Zoho Bigin interactive workspace state
+  const [biginOrg, setBiginOrg] = useState<BiginOrgDetailsContract | undefined>(undefined);
+  const [biginModules, setBiginModules] = useState<readonly BiginModuleItemResponse[]>([]);
+  const [biginWatch, setBiginWatch] = useState<readonly BiginNotificationDetailsContract[]>([]);
+  const [biginContacts, setBiginContacts] = useState<readonly BiginContactItemContract[]>([]);
+  const [biginSyncing, setBiginSyncing] = useState(false);
+  const [biginFullName, setBiginFullName] = useState('Sophia Reyes');
+  const [biginEmail, setBiginEmail] = useState('s.reyes@partner-enterprise.io');
+  const [biginAccountName, setBiginAccountName] = useState('Partner Enterprise Holdings');
+  const [biginTitle, setBiginTitle] = useState('Director of Settlements');
+
+  // Google Chat interactive workspace state
+  const [chatSpaceId, setChatSpaceId] = useState('spaces/ops-alerts');
+  const [chatThreadKey, setChatThreadKey] = useState('ops-incident-bridge');
+  const [chatMessageText, setChatMessageText] = useState(
+    'All Q4 settlement connectors verified healthy under capability ticket enforcement.'
+  );
+  const [chatMessages, setChatMessages] = useState<readonly ChatMessageContract[]>([
+    {
+      messageId: 'spaces/ops-alerts/messages/msg_401',
+      spaceId: 'spaces/ops-alerts',
+      sender: 'release-bot@pipeline.local',
+      text: '[AUTHZ_P01..P11] Daily capability ticket verification completed across 6 connectors.',
+      threadKey: 'ops-daily-verification',
+      createdAtUtc: '2026-10-23T09:00:00Z',
+    },
+    {
+      messageId: 'spaces/ops-alerts/messages/msg_402',
+      spaceId: 'spaces/ops-alerts',
+      sender: 'treasury-watch@pipeline.local',
+      text: 'PayMongo settlement batch #2026-10-23 reconciled with 0 discrepancies.',
+      threadKey: 'settlement-reconcile',
+      createdAtUtc: '2026-10-23T10:30:00Z',
+    },
+  ]);
+
+  // Zoho Expense interactive workspace state
+  const [expenseOrgId, setExpenseOrgId] = useState('zoho_org_primary');
+  const [expenseMerchant, setExpenseMerchant] = useState('Cloudflare Enterprise Edge');
+  const [expenseCategory, setExpenseCategory] = useState('Infrastructure & Security');
+  const [expenseAmount, setExpenseAmount] = useState('650.00');
+  const [expenseItems, setExpenseItems] = useState<readonly ZohoExpenseItemContract[]>([]);
+  const [expenseTotalAmount, setExpenseTotalAmount] = useState(0);
+  const [expenseSyncing, setExpenseSyncing] = useState(false);
+
+  const handleSyncBigin = useCallback(async () => {
+    setBiginSyncing(true);
+    const res = await biginApi.readContacts({ dataCenter: 'US' }, createCorrelationId());
+    setBiginSyncing(false);
+    if (res.ok) {
+      setBiginContacts(res.value.contacts);
+      setBiginOrg(res.value.org);
+      setBiginModules(res.value.modules);
+      setBiginWatch(res.value.notifications.watch);
+    }
+  }, [biginApi]);
+
+  const handleSyncExpenses = useCallback(async () => {
+    setExpenseSyncing(true);
+    const res = await zohoExpenseApi.readExpenses({ orgId: expenseOrgId }, createCorrelationId());
+    setExpenseSyncing(false);
+    if (res.ok) {
+      setExpenseItems(res.value.expenses);
+      setExpenseTotalAmount(res.value.totalAmount);
+    }
+  }, [expenseOrgId, zohoExpenseApi]);
+
+  const biginMutation = useMutationIntent<CreateBiginContactRequest, CreateBiginContactResponse>(
+    useCallback(
+      async (payload, correlationId, idempotencyKey) => {
+        const res = await biginApi.createContact(payload, correlationId, idempotencyKey);
+        if (res.ok) {
+          setBiginContacts((prev) => [res.value.contact, ...prev]);
+        }
+        return res;
+      },
+      [biginApi]
+    ),
+    'bigin.contacts.create'
+  );
+
+  const chatMutation = useMutationIntent<CreateChatMessageRequest, CreateChatMessageResponse>(
+    useCallback(
+      async (payload, correlationId, idempotencyKey) => {
+        const res = await chatApi.postMessage(payload, correlationId, idempotencyKey);
+        if (res.ok) {
+          setChatMessages(res.value.history);
+        }
+        return res;
+      },
+      [chatApi]
+    ),
+    'chat.create'
+  );
+
+  const expenseMutation = useMutationIntent<CreateZohoExpenseRequest, CreateZohoExpenseResponse>(
+    useCallback(
+      async (payload, correlationId, idempotencyKey) => {
+        const res = await zohoExpenseApi.createExpense(payload, correlationId, idempotencyKey);
+        if (res.ok) {
+          setExpenseItems(res.value.expenses);
+          setExpenseTotalAmount(
+            res.value.expenses.reduce((sum, item) => sum + item.amount, 0)
+          );
+        }
+        return res;
+      },
+      [zohoExpenseApi]
+    ),
+    'zoho.expense.create'
+  );
+
+  useEffect(() => {
+    if (activeFeatureId === 'bigin' && isAuthenticated && biginContacts.length === 0) {
+      void handleSyncBigin();
+    } else if (activeFeatureId === 'zoho-expense' && isAuthenticated && expenseItems.length === 0) {
+      void handleSyncExpenses();
+    }
+  }, [
+    activeFeatureId,
+    isAuthenticated,
+    biginContacts.length,
+    expenseItems.length,
+    handleSyncBigin,
+    handleSyncExpenses,
+  ]);
 
   const handleNavigate = useCallback(
     (destId: string) => {
@@ -462,12 +611,127 @@ export function AppBootstrap() {
               activeFeature.id === 'zoho-expense'
                 ? 'Review and manage protected expense workflows through Zoho Expense.'
                 : activeFeature.id === 'bigin'
-                ? 'Review protected contacts and relationship workflows through Zoho Bigin.'
-                : 'Review protected spaces and messaging workflows through Google Chat.'
+                ? 'Review protected contacts, organization profile, and webhook watches through Zoho Bigin.'
+                : 'Review protected spaces and broadcast operational alerts through Google Chat.'
             }
             routes={activeFeature.routes.map((route) => route.name)}
             canAccess={Boolean(activeFeature.routes[0]?.requiredPermission && hasPermission(activeFeature.routes[0].requiredPermission))}
             onSignIn={establishDefaultSession}
+            onInspectJobs={() => handleNavigate('jobs')}
+            biginProps={
+              activeFeature.id === 'bigin'
+                ? {
+                    org: biginOrg,
+                    modules: biginModules,
+                    watchChannels: biginWatch,
+                    contacts: biginContacts,
+                    isSyncing: biginSyncing,
+                    canRead: hasPermission('bigin.contacts.read'),
+                    canCreate: hasPermission('bigin.contacts.create'),
+                    fullName: biginFullName,
+                    email: biginEmail,
+                    accountName: biginAccountName,
+                    title: biginTitle,
+                    onChangeFullName: setBiginFullName,
+                    onChangeEmail: setBiginEmail,
+                    onChangeAccountName: setBiginAccountName,
+                    onChangeTitle: setBiginTitle,
+                    onSync: () => {
+                      void handleSyncBigin();
+                    },
+                    onCreateContact: () => {
+                      void biginMutation.execute(
+                        {
+                          fullName: biginFullName,
+                          email: biginEmail,
+                          accountName: biginAccountName,
+                          title: biginTitle,
+                          dataCenter: 'US',
+                        },
+                        true
+                      );
+                    },
+                    intentState: biginMutation.state,
+                    onConfirmIntent: () => {
+                      void biginMutation.confirm();
+                    },
+                    onCancelIntent: biginMutation.reset,
+                    onResetIntent: biginMutation.reset,
+                  }
+                : undefined
+            }
+            chatProps={
+              activeFeature.id === 'chat'
+                ? {
+                    spaceId: chatSpaceId,
+                    threadKey: chatThreadKey,
+                    messageText: chatMessageText,
+                    messages: chatMessages,
+                    canPost: hasPermission('chat.messages.create'),
+                    onChangeSpaceId: setChatSpaceId,
+                    onChangeThreadKey: setChatThreadKey,
+                    onChangeMessageText: setChatMessageText,
+                    onSendMessage: () => {
+                      void chatMutation.execute(
+                        {
+                          spaceId: chatSpaceId,
+                          text: chatMessageText,
+                          threadKey: chatThreadKey,
+                        },
+                        true
+                      );
+                    },
+                    intentState: chatMutation.state,
+                    onConfirmIntent: () => {
+                      void chatMutation.confirm();
+                    },
+                    onCancelIntent: chatMutation.reset,
+                    onResetIntent: chatMutation.reset,
+                  }
+                : undefined
+            }
+            zohoExpenseProps={
+              activeFeature.id === 'zoho-expense'
+                ? {
+                    orgId: expenseOrgId,
+                    merchant: expenseMerchant,
+                    category: expenseCategory,
+                    amount: expenseAmount,
+                    currency: 'USD',
+                    expenses: expenseItems,
+                    totalAmount: expenseTotalAmount,
+                    isSyncing: expenseSyncing,
+                    canRead: hasPermission('zoho.expense.read'),
+                    canCreate: hasPermission('zoho.expense.create'),
+                    onChangeOrgId: setExpenseOrgId,
+                    onChangeMerchant: setExpenseMerchant,
+                    onChangeCategory: setExpenseCategory,
+                    onChangeAmount: setExpenseAmount,
+                    onSyncExpenses: () => {
+                      void handleSyncExpenses();
+                    },
+                    onCreateExpense: () => {
+                      const parsedAmount = Number.parseFloat(expenseAmount);
+                      void expenseMutation.execute(
+                        {
+                          orgId: expenseOrgId,
+                          merchant: expenseMerchant,
+                          category: expenseCategory,
+                          amount: Number.isFinite(parsedAmount) ? parsedAmount : 0,
+                          currency: 'USD',
+                        },
+                        true
+                      );
+                    },
+                    intentState: expenseMutation.state,
+                    onConfirmIntent: () => {
+                      void expenseMutation.confirm();
+                    },
+                    onCancelIntent: expenseMutation.reset,
+                    onResetIntent: expenseMutation.reset,
+                  }
+                : undefined
+            }
           />
         )}
 

@@ -31,3 +31,22 @@ export function resolveColorScheme(
 
   return 'light';
 }
+
+export function formatThemeOptionLabel(
+  mode: ThemePreference,
+  baseLabel: string,
+  systemScheme?: ColorScheme | null | undefined
+): string {
+  if (mode === 'system') {
+    const resolvedName =
+      systemScheme === 'dark' ? 'Dark' : systemScheme === 'light' ? 'Light' : undefined;
+    return resolvedName ? `${baseLabel} (${resolvedName})` : baseLabel;
+  }
+  return baseLabel;
+}
+
+export function getThemeOptionIndex(mode: ThemePreference): 0 | 1 | 2 {
+  if (mode === 'light') return 0;
+  if (mode === 'dark') return 1;
+  return 2;
+}

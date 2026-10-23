@@ -170,7 +170,7 @@ export function SheetsWorkspaceScreen({
   };
 
   return (
-    <View className="space-y-6">
+    <View className="gap-6">
       <IntentStatusBanner
         state={writeIntent}
         operationSummary={`Write ${rows.length} row(s) to spreadsheet "${spreadsheetId}" (${range})`}
@@ -301,7 +301,7 @@ export function SheetsWorkspaceScreen({
             />
           ) : isCompact ? (
             /* Mobile-friendly stacked record cards */
-            <View className="space-y-3 mt-2">
+            <View className="gap-3 mt-2">
               {displayedRows.map((item) => {
                 const { data: row, actualRowIndex } = item;
                 return (

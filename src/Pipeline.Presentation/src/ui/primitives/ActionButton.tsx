@@ -1,7 +1,8 @@
 // Rules: L-01 Pure UI layer, R-07 Double-submit guard while Submitting, N-06, N-07
-// Accessibility: Enforces min-h-[44px] touch target and descriptive busy state
+// Accessibility: Enforces min-h-[44px] touch target, compositor-thread press animation, and descriptive busy state
 import React from 'react';
-import { Pressable, Text, ActivityIndicator, View } from 'react-native';
+import { Pressable, Text, ActivityIndicator, View, Animated } from 'react-native';
+import { usePressScaleAnimation } from '../theme/useMotion';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'destructive';
 
@@ -19,8 +20,8 @@ export interface ActionButtonProps {
 
 const SURFACE_MAP: Record<ButtonVariant, string> = {
   primary: 'bg-accent-600 active:bg-accent-700 hover:bg-accent-700 border border-accent-600 focus:border-accent-400',
-  secondary: 'bg-canvas-white dark:bg-canvas-900 active:bg-canvas-100 dark:active:bg-canvas-800 hover:bg-canvas-50 dark:hover:bg-canvas-850 border border-canvas-200 dark:border-canvas-700 focus:border-accent-500',
-  tertiary: 'bg-transparent active:bg-canvas-100 dark:active:bg-canvas-800 hover:bg-canvas-50 dark:hover:bg-canvas-850 border border-transparent focus:border-accent-500',
+  secondary: 'bg-canvas-white dark:bg-canvas-900 active:bg-canvas-100 dark:active:bg-canvas-800 hover:bg-canvas-50 dark:hover:bg-canvas-800 border border-canvas-200 dark:border-canvas-700 focus:border-accent-500',
+  tertiary: 'bg-transparent active:bg-canvas-100 dark:active:bg-canvas-800 hover:bg-canvas-50 dark:hover:bg-canvas-800 border border-transparent focus:border-accent-500',
   destructive: 'bg-status-dangerBg active:bg-status-dangerBorder hover:bg-status-dangerBg/80 border border-status-dangerBorder focus:border-status-dangerText',
 };
 
@@ -52,25 +53,31 @@ export function ActionButton({
   const surfaceClass = isLocked ? DISABLED_SURFACE : SURFACE_MAP[variant];
   const textClass = isLocked ? DISABLED_TEXT : TEXT_MAP[variant];
 
+  const { animatedStyle, onPressIn, onPressOut } = usePressScaleAnimation(isLocked);
+
   const buttonElement = (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={isSubmitting ? `${label}, ${submittingLabel}` : label}
-      accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled: isLocked, busy: isSubmitting }}
-      disabled={isLocked}
-      onPress={onPress}
-      className={`${widthClass} ${surfaceClass} min-h-[44px] px-4 py-2.5 rounded-md flex-row items-center justify-center`}
-    >
-      {isSubmitting ? (
-        <View className="flex-row items-center">
-          <ActivityIndicator size="small" />
-          <Text className={`${textClass} ml-2`}>{submittingLabel}</Text>
-        </View>
-      ) : (
-        <Text className={textClass}>{label}</Text>
-      )}
-    </Pressable>
+    <Animated.View style={animatedStyle} className={widthClass}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={isSubmitting ? `${label}, ${submittingLabel}` : label}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={{ disabled: isLocked, busy: isSubmitting }}
+        disabled={isLocked}
+        onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        className={`${widthClass} ${surfaceClass} min-h-[44px] px-4 py-2.5 rounded-lg flex-row items-center justify-center`}
+      >
+        {isSubmitting ? (
+          <View className="flex-row items-center">
+            <ActivityIndicator size="small" />
+            <Text className={`${textClass} ml-2`}>{submittingLabel}</Text>
+          </View>
+        ) : (
+          <Text className={textClass}>{label}</Text>
+        )}
+      </Pressable>
+    </Animated.View>
   );
 
   if (disabled && disabledReason) {

@@ -68,10 +68,33 @@ _Use_decl_annotations_ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, PSTR 
   settings.UseDeveloperSupport(false);
 #endif
 
-  // Get the AppWindow so we can configure its initial title and size
+  // Get the AppWindow so we can configure its initial title, size, and modern dark-slate title bar
   auto appWindow{reactNativeWin32App.AppWindow()};
-  appWindow.Title(L"PipelineApp");
+  appWindow.Title(L"Pipeline — Admin Console");
   appWindow.Resize({1200, 850});
+
+  if (winrt::Microsoft::UI::Windowing::AppWindowTitleBar::IsCustomizationSupported()) {
+    auto titleBar{appWindow.TitleBar()};
+    winrt::Windows::UI::Color surfaceDark{255, 24, 24, 27};      // #18181B (canvas-900)
+    winrt::Windows::UI::Color surfaceHover{255, 39, 39, 42};     // #27272A (canvas-800)
+    winrt::Windows::UI::Color surfacePressed{255, 63, 63, 70};   // #3F3F46 (canvas-700)
+    winrt::Windows::UI::Color textLight{255, 250, 250, 250};     // #FAFAFA (canvas-50)
+    winrt::Windows::UI::Color textMuted{255, 161, 161, 170};     // #A1A1AA (canvas-400)
+
+    titleBar.BackgroundColor(surfaceDark);
+    titleBar.ForegroundColor(textLight);
+    titleBar.InactiveBackgroundColor(surfaceDark);
+    titleBar.InactiveForegroundColor(textMuted);
+
+    titleBar.ButtonBackgroundColor(surfaceDark);
+    titleBar.ButtonForegroundColor(textLight);
+    titleBar.ButtonHoverBackgroundColor(surfaceHover);
+    titleBar.ButtonHoverForegroundColor(textLight);
+    titleBar.ButtonPressedBackgroundColor(surfacePressed);
+    titleBar.ButtonPressedForegroundColor(textLight);
+    titleBar.ButtonInactiveBackgroundColor(surfaceDark);
+    titleBar.ButtonInactiveForegroundColor(textMuted);
+  }
 
   // Get the ReactViewOptions so we can set the initial RN component to load
   auto viewOptions{reactNativeWin32App.ReactViewOptions()};

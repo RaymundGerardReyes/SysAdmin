@@ -2,16 +2,27 @@
 import { useWindowDimensions, useColorScheme as useRNColorScheme } from 'react-native';
 import { useColorScheme as useNativeWindColorScheme } from 'nativewind';
 import { tokens } from './tokens';
-import { getLayoutBreakpoint, resolveColorScheme } from './themeLogic';
+import {
+  getLayoutBreakpoint,
+  resolveColorScheme,
+  formatThemeOptionLabel,
+  getThemeOptionIndex,
+} from './themeLogic';
 
 export type { LayoutBreakpoint, ThemePreference, ColorScheme } from './themeLogic';
-export { getLayoutBreakpoint, resolveColorScheme } from './themeLogic';
+export {
+  getLayoutBreakpoint,
+  resolveColorScheme,
+  formatThemeOptionLabel,
+  getThemeOptionIndex,
+} from './themeLogic';
 
 export function useAppTheme() {
   const { width, height } = useWindowDimensions();
   const rnScheme = useRNColorScheme();
   const nw = useNativeWindColorScheme();
 
+  const systemColorScheme = resolveColorScheme(undefined, rnScheme);
   const activeColorScheme = resolveColorScheme(nw?.colorScheme, rnScheme);
   const isDark = activeColorScheme === 'dark';
   const breakpoint = getLayoutBreakpoint(width);
@@ -30,6 +41,7 @@ export function useAppTheme() {
     gridCols,
     contentPadding,
     colorScheme: activeColorScheme,
+    systemColorScheme,
     isDark,
     setColorScheme: nw?.setColorScheme,
   };

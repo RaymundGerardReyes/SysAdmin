@@ -4,13 +4,13 @@ export const chatManifest: FeatureManifest = {
   id: 'chat',
   name: 'Google Chat',
   owner: '@google-chat-team',
-  maxTier: 'T1',
+  maxTier: 'T2',
   routes: [
     {
       name: 'ChatSpaces',
       requiredPermission: 'chat.messages.create',
-      tier: 'T0',
+      tier: 'T2',
     },
   ],
-  commands: ['chat.messages.create'],
+  commands: ['chat.create'],
 };

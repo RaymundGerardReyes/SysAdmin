@@ -9,9 +9,16 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from 'react-native';
 import { PlatformShellProps } from './PlatformShell.types';
-import { Badge, SurfaceCard } from '../ui';
+import {
+  Badge,
+  SurfaceCard,
+  useAppTheme,
+  formatThemeOptionLabel,
+  usePressScaleAnimation,
+} from '../ui';
 
 export function PlatformShell({
   title = 'Pipeline',
@@ -30,6 +37,8 @@ export function PlatformShell({
   children,
 }: PlatformShellProps) {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const { systemColorScheme } = useAppTheme();
+  const { animatedStyle, onPressIn, onPressOut } = usePressScaleAnimation(false);
 
   const primaryTabs = navItems.slice(0, 4);
   const secondaryTabs = navItems.slice(4);
@@ -40,6 +49,14 @@ export function PlatformShell({
     const next = themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark';
     onSelectThemeMode(next);
   };
+
+  const currentThemeBaseLabel =
+    themeMode === 'light' ? 'Light' : themeMode === 'dark' ? 'Dark' : 'Auto';
+  const currentThemeAria = formatThemeOptionLabel(
+    themeMode,
+    currentThemeBaseLabel,
+    systemColorScheme
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-canvas-50 dark:bg-canvas-950">
@@ -87,16 +104,23 @@ export function PlatformShell({
         </View>
         <View className="flex-row items-center gap-2">
           {onSelectThemeMode && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Cycle color theme"
-              onPress={cycleTheme}
-              className="min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-canvas-200 dark:border-canvas-700 bg-canvas-100 dark:bg-canvas-800"
-            >
-              <Text className="text-sm text-canvas-900 dark:text-canvas-50">
-                {themeMode === 'light' ? '☀' : themeMode === 'dark' ? '☾' : '◐'}
-              </Text>
-            </Pressable>
+            <Animated.View style={animatedStyle}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Cycle color theme (${currentThemeAria})`}
+                onPress={cycleTheme}
+                onPressIn={onPressIn}
+                onPressOut={onPressOut}
+                className="min-h-[44px] px-3 flex-row items-center justify-center gap-1 rounded-lg border border-canvas-200 dark:border-canvas-700 bg-canvas-100 dark:bg-canvas-800"
+              >
+                <Text className="text-sm text-accent-600 dark:text-accent-400 font-bold">
+                  {themeMode === 'light' ? '☀' : themeMode === 'dark' ? '☾' : '◐'}
+                </Text>
+                <Text className="text-xs font-semibold text-canvas-900 dark:text-canvas-50">
+                  {currentThemeBaseLabel}
+                </Text>
+              </Pressable>
+            </Animated.View>
           )}
           {headerActions}
           <Badge

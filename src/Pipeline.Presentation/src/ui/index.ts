@@ -1,5 +1,6 @@
 export * from './theme/tokens';
 export * from './theme/useAppTheme';
+export * from './theme/useMotion';
 export * from './primitives/SurfaceCard';
 export * from './primitives/Badge';
 export * from './primitives/ActionButton';

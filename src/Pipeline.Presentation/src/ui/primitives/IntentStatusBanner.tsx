@@ -1,10 +1,11 @@
 // Rules: L-04 9 named intent phases, B-02 No auto-retry on write timeout, R-07 Idempotency preservation, N-06, N-07
-import React, { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Pressable, Animated } from 'react-native';
 import { IntentState } from '../../core/intent/intent.types';
 import { SurfaceCard } from './SurfaceCard';
 import { Badge, BadgeTone } from './Badge';
 import { ActionButton } from './ActionButton';
+import { useReducedMotion } from '../theme/useMotion';
 
 export interface IntentStatusBannerProps {
   readonly state: IntentState;
@@ -33,6 +34,48 @@ export function IntentStatusBanner({
   onInspectActivity,
 }: IntentStatusBannerProps) {
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
+  const reducedMotion = useReducedMotion();
+
+  const opacityAnim = useRef(new Animated.Value(1)).current;
+  const translateYAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (state.phase === 'Idle') {
+      return;
+    }
+
+    if (reducedMotion) {
+      opacityAnim.setValue(1);
+      translateYAnim.setValue(0);
+      scaleAnim.setValue(1);
+      return;
+    }
+
+    opacityAnim.setValue(0.25);
+    translateYAnim.setValue(-6);
+    scaleAnim.setValue(0.985);
+
+    Animated.parallel([
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+      Animated.spring(translateYAnim, {
+        toValue: 0,
+        speed: 24,
+        bounciness: 6,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        speed: 24,
+        bounciness: 6,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [opacityAnim, reducedMotion, scaleAnim, state.phase, translateYAnim]);
 
   if (state.phase === 'Idle') {
     return null;
@@ -41,7 +84,14 @@ export function IntentStatusBanner({
   const badgeMeta = PHASE_BADGE_MAP[state.phase];
 
   return (
-    <View accessibilityLiveRegion="polite" className="mb-4">
+    <Animated.View
+      accessibilityLiveRegion="polite"
+      style={{
+        opacity: opacityAnim,
+        transform: [{ translateY: translateYAnim }, { scale: scaleAnim }],
+      }}
+      className="mb-4"
+    >
       <SurfaceCard
         variant={
           state.phase === 'AwaitingConfirm' || state.phase === 'Succeeded'
@@ -256,6 +306,6 @@ export function IntentStatusBanner({
           </View>
         )}
       </SurfaceCard>
-    </View>
+    </Animated.View>
   );
 }

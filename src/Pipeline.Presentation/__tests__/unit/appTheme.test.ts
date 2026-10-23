@@ -2,6 +2,8 @@
 import {
   getLayoutBreakpoint,
   resolveColorScheme,
+  formatThemeOptionLabel,
+  getThemeOptionIndex,
 } from '../../src/ui/theme/themeLogic';
 
 describe('app theme helpers', () => {
@@ -17,5 +19,19 @@ describe('app theme helpers', () => {
     expect(resolveColorScheme('dark', 'light')).toBe('dark');
     expect(resolveColorScheme(undefined, 'dark')).toBe('dark');
     expect(resolveColorScheme('system', null)).toBe('light');
+  });
+
+  it('[L-01] formats theme option label with resolved system theme in parentheses', () => {
+    expect(formatThemeOptionLabel('system', 'Auto', 'dark')).toBe('Auto (Dark)');
+    expect(formatThemeOptionLabel('system', 'Auto', 'light')).toBe('Auto (Light)');
+    expect(formatThemeOptionLabel('system', 'Auto', null)).toBe('Auto');
+    expect(formatThemeOptionLabel('light', 'Light', 'dark')).toBe('Light');
+    expect(formatThemeOptionLabel('dark', 'Dark', 'light')).toBe('Dark');
+  });
+
+  it('[L-01] indexes theme options accurately for sliding pill layout', () => {
+    expect(getThemeOptionIndex('light')).toBe(0);
+    expect(getThemeOptionIndex('dark')).toBe(1);
+    expect(getThemeOptionIndex('system')).toBe(2);
   });
 });

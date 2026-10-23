@@ -183,6 +183,108 @@ function patchJestUtil() {
   }
 }
 
+function patchCssInteropColorScheme() {
+  const targetFile = path.resolve(
+    __dirname,
+    '../node_modules/react-native-css-interop/dist/runtime/native/appearance-observables.js'
+  );
+
+  if (!fs.existsSync(targetFile)) {
+    return;
+  }
+
+  let content = fs.readFileSync(targetFile, 'utf8');
+  if (content.includes('/* [patch-rnw-color-scheme] */')) {
+    console.log('[patch-rnw] appearance-observables.js already patched.');
+    return;
+  }
+
+  const unpatched = `        if (process.env.NODE_ENV === "test") {
+            colorSchemeObservable.set(value === "system" ? "light" : value);
+        }`;
+
+  const patched = `        /* [patch-rnw-color-scheme] */
+        if (process.env.NODE_ENV === "test") {
+            colorSchemeObservable.set(value === "system" ? "light" : value);
+        }
+        else {
+            colorSchemeObservable.set(value === "system" ? undefined : value);
+        }`;
+
+  const unpatchedNormalized = unpatched.replace(/\n/g, '\r\n');
+  if (content.includes(unpatched)) {
+    content = content.replace(unpatched, patched);
+    fs.writeFileSync(targetFile, content, 'utf8');
+    console.log('[patch-rnw] Patched react-native-css-interop appearance-observables.js for reactive theme switching.');
+  } else if (content.includes(unpatchedNormalized)) {
+    content = content.replace(unpatchedNormalized, patched.replace(/\n/g, '\r\n'));
+    fs.writeFileSync(targetFile, content, 'utf8');
+    console.log('[patch-rnw] Patched react-native-css-interop appearance-observables.js for reactive theme switching.');
+  } else {
+    console.warn('[patch-rnw] Could not match colorScheme.set pattern in appearance-observables.js.');
+  }
+}
+
+function patchRnwAppearance() {
+  const targetFile = path.resolve(
+    __dirname,
+    '../node_modules/react-native-windows/Libraries/Utilities/Appearance.js'
+  );
+
+  if (!fs.existsSync(targetFile)) {
+    return;
+  }
+
+  let content = fs.readFileSync(targetFile, 'utf8');
+  if (content.includes('/* [patch-rnw-appearance] */')) {
+    console.log('[patch-rnw] RNW Appearance.js already patched.');
+    return;
+  }
+
+  const unpatched = `export function setColorScheme(colorScheme: ColorSchemeName): void {
+  const state = getState();
+  const {NativeAppearance} = state;
+  if (NativeAppearance != null) {
+    NativeAppearance.setColorScheme(colorScheme);
+    state.appearance = {
+      colorScheme,
+    };
+  }
+}`;
+
+  const patched = `export function setColorScheme(colorScheme: ColorSchemeName): void {
+  /* [patch-rnw-appearance] */
+  const state = getState();
+  const {NativeAppearance} = state;
+  if (NativeAppearance != null) {
+    NativeAppearance.setColorScheme(colorScheme);
+    const resolvedScheme =
+      colorScheme === 'light' || colorScheme === 'dark'
+        ? colorScheme
+        : NativeAppearance.getColorScheme();
+    state.appearance = {
+      colorScheme: resolvedScheme,
+    };
+    state.eventEmitter.emit('change', state.appearance);
+  }
+}`;
+
+  const unpatchedNormalized = unpatched.replace(/\n/g, '\r\n');
+  if (content.includes(unpatched)) {
+    content = content.replace(unpatched, patched);
+    fs.writeFileSync(targetFile, content, 'utf8');
+    console.log('[patch-rnw] Patched react-native-windows Appearance.js to emit change events.');
+  } else if (content.includes(unpatchedNormalized)) {
+    content = content.replace(unpatchedNormalized, patched.replace(/\n/g, '\r\n'));
+    fs.writeFileSync(targetFile, content, 'utf8');
+    console.log('[patch-rnw] Patched react-native-windows Appearance.js to emit change events.');
+  } else {
+    console.warn('[patch-rnw] Could not match setColorScheme pattern in RNW Appearance.js.');
+  }
+}
+
 patchFindDotnetTools();
 patchWindowsStoreAppUtils();
 patchJestUtil();
+patchCssInteropColorScheme();
+patchRnwAppearance();

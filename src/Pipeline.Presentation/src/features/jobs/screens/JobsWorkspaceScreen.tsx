@@ -109,7 +109,7 @@ export function JobsWorkspaceScreen({ api, bridge }: JobsWorkspaceScreenProps) {
       selectedJob.status === 'RetryScheduled');
 
   return (
-    <View className="space-y-6">
+    <View className="gap-6">
       <IntentStatusBanner
         state={cancelIntent}
         operationSummary={`Cancel execution of background job "${selectedJob?.id ?? ''}" (${selectedJob?.command ?? ''})`}
@@ -138,7 +138,7 @@ export function JobsWorkspaceScreen({ api, bridge }: JobsWorkspaceScreenProps) {
             No operations are currently in flight.
           </Text>
         ) : (
-          <View className="space-y-2">
+          <View className="gap-2">
             {pendingOps.map((op) => (
               <SurfaceCard key={op.idempotencyKey} variant="subtle" padding="sm">
                 <View className="flex-row items-center justify-between">
@@ -216,7 +216,7 @@ export function JobsWorkspaceScreen({ api, bridge }: JobsWorkspaceScreenProps) {
         </View>
 
         {/* Master List + Detail Inspector */}
-        <View className={isCompact ? 'flex-col space-y-4' : 'flex-row gap-6'}>
+        <View className={isCompact ? 'flex-col gap-4' : 'flex-row gap-6'}>
           {/* Master Job List */}
           <View className={selectedJob && !isCompact ? 'w-1/2' : 'w-full'}>
             {filteredJobs.length === 0 ? (
@@ -227,7 +227,7 @@ export function JobsWorkspaceScreen({ api, bridge }: JobsWorkspaceScreenProps) {
                 onAction={handleRefreshJobs}
               />
             ) : (
-              <View className="space-y-3">
+              <View className="gap-3">
                 {filteredJobs.map((job) => {
                   const isSelected = selectedJob?.id === job.id;
                   return (
@@ -276,7 +276,7 @@ export function JobsWorkspaceScreen({ api, bridge }: JobsWorkspaceScreenProps) {
                   </Pressable>
                 </View>
 
-                <View className="space-y-2 mb-4">
+                <View className="gap-2 mb-4">
                   <View className="flex-row justify-between py-1 border-b border-canvas-100 dark:border-canvas-800">
                     <Text className="text-xs text-canvas-500 dark:text-canvas-400">Command</Text>
                     <Text className="text-xs font-semibold text-canvas-900 dark:text-canvas-50">
@@ -339,7 +339,7 @@ export function JobsWorkspaceScreen({ api, bridge }: JobsWorkspaceScreenProps) {
             No user actions or bridge events recorded in this session yet.
           </Text>
         ) : (
-          <View className="space-y-2">
+          <View className="gap-2">
             {recordedEvents.slice(-8).reverse().map((entry, idx) => (
               <View
                 key={`${entry.timestamp}-${idx}`}
