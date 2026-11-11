@@ -14,7 +14,7 @@ export function useReducedMotion(): boolean {
 
     let isMounted = true;
     AccessibilityInfo.isReduceMotionEnabled?.()
-      ?.then((enabled) => {
+      ?.then((enabled: boolean) => {
         if (isMounted && typeof enabled === 'boolean') {
           setReducedMotion(enabled);
         }

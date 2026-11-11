@@ -4,7 +4,7 @@ export const zohoExpenseManifest: FeatureManifest = {
   id: 'zoho-expense',
   name: 'Zoho Expense',
   owner: '@zoho-expense-team',
-  maxTier: 'T1',
+  maxTier: 'T2',
   routes: [
     {
       name: 'ExpenseOverview',
@@ -14,7 +14,7 @@ export const zohoExpenseManifest: FeatureManifest = {
     {
       name: 'ExpenseCreate',
       requiredPermission: 'zoho.expense.create',
-      tier: 'T1',
+      tier: 'T2',
     },
   ],
   commands: ['zoho.expense.read', 'zoho.expense.create'],

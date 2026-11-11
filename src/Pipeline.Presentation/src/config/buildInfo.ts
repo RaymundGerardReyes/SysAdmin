@@ -14,10 +14,10 @@ export interface BuildInfo {
 
 export const BUILD_INFO: BuildInfo = {
   component: 'frontend',
-  version: '1.4.0',
+  version: '1.5.0',
   tagPrefix: 'frontend-v',
   targetApiVersion: '1.0.0',
-  buildDate: '2026-10-23',
+  buildDate: '2026-11-12',
   platform: 'react-native-windows-ios',
 } as const;
 

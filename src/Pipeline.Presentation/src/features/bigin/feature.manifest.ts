@@ -4,7 +4,7 @@ export const biginManifest: FeatureManifest = {
   id: 'bigin',
   name: 'Zoho Bigin',
   owner: '@bigin-team',
-  maxTier: 'T1',
+  maxTier: 'T2',
   routes: [
     {
       name: 'BiginContacts',
@@ -14,7 +14,7 @@ export const biginManifest: FeatureManifest = {
     {
       name: 'BiginContactCreate',
       requiredPermission: 'bigin.contacts.create',
-      tier: 'T1',
+      tier: 'T2',
     },
   ],
   commands: ['bigin.contacts.read', 'bigin.contacts.create'],

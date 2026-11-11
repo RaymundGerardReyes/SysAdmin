@@ -41,7 +41,7 @@
       ]
     },
     "frontend": {
-      "version": "1.4.0",
+      "version": "1.5.0",
       "tagPrefix": "frontend-v",
       "description": "React Native Windows + iOS presentation, intent machine, and design system",
       "canonicalFile": "src/Pipeline.Presentation/package.json",

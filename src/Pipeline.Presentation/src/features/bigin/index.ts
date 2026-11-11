@@ -1,1 +1,3 @@
-export { biginManifest } from './feature.manifest';
+export * from './feature.manifest';
+export * from './api/biginApi';
+export * from './screens/BiginWorkspaceScreen';
