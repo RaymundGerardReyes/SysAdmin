@@ -4,7 +4,7 @@
   "description": "Multi-component decoupled Semantic Versioning manifest for PipelineSolution",
   "components": {
     "backend": {
-      "version": "1.1.0",
+      "version": "1.2.0",
       "tagPrefix": "backend-v",
       "description": "Backend modular monolith domain, application, infrastructure, host and integrations",
       "canonicalFile": "Directory.Build.props",
@@ -19,9 +19,13 @@
         "src/Pipeline.Infrastructure",
         "src/Pipeline.Desktop.Host",
         "src/Pipeline.Contracts",
-        "src/Integrations.Gmail",
-        "src/Integrations.GoogleSheets",
-        "src/Integrations.Stripe"
+        "src/Integrations.Google.Chat",
+        "src/Integrations.Google.Gmail",
+        "src/Integrations.Google.Sheets",
+        "src/Integrations.PayMongo",
+        "src/Integrations.Zoho.Bigin",
+        "src/Integrations.Zoho.Expense",
+        "tests"
       ]
     },
     "api": {
@@ -50,4 +54,3 @@
     }
   }
 }
-

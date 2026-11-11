@@ -56,6 +56,12 @@ public static class ServiceRegistration
         services.AddTransient<IUseCaseHandler<GetBiginOrgCommand, BiginOrgResponseContract>, GetBiginOrgUseCase>();
         services.AddTransient<IUseCaseHandler<UploadBiginOrgPhotoCommand, BiginPhotoUploadResponseContract>, UploadBiginOrgPhotoUseCase>();
         services.AddTransient<IUseCaseHandler<GetBiginRelatedRecordsCommand, BiginRelatedRecordsResponseContract>, GetBiginRelatedRecordsUseCase>();
+        services.AddTransient<IUseCaseHandler<EnableBiginNotificationsCommand, BiginWatchOperationResponse>, EnableBiginNotificationsUseCase>();
+        services.AddTransient<IUseCaseHandler<GetBiginNotificationDetailsCommand, GetBiginNotificationDetailsResponseContract>, GetBiginNotificationDetailsUseCase>();
+        services.AddTransient<IUseCaseHandler<UpdateBiginNotificationsCommand, BiginWatchOperationResponse>, UpdateBiginNotificationsUseCase>();
+        services.AddTransient<IUseCaseHandler<UpdateSpecificBiginNotificationsCommand, BiginWatchOperationResponse>, UpdateSpecificBiginNotificationsUseCase>();
+        services.AddTransient<IUseCaseHandler<DisableBiginNotificationsCommand, BiginWatchOperationResponse>, DisableBiginNotificationsUseCase>();
+        services.AddTransient<IUseCaseHandler<DisableSpecificBiginNotificationsCommand, BiginWatchOperationResponse>, DisableSpecificBiginNotificationsUseCase>();
 
         // IPC Router
         services.AddSingleton<IpcMessageRouter>();
